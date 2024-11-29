@@ -1,0 +1,316 @@
+// Client configuration for Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Database configuration using PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================ User Models ============================
+
+// User model represents the user in the system
+model User {
+  userId                   Int        @id @default(autoincrement()) // Unique user identifier
+  firstName                String // First name of the user
+  middleName               String // Middle name of the user
+  lastName                 String // Last name of the user
+  mobileNo                 String // Mobile number
+  emailId                  String     @unique // Unique email for the user
+  password                 String // User's password
+  profileUrl               String // URL of the user's profile picture
+  isActive                 Boolean // Account status (active/inactive)
+  showActivity             Boolean // Whether the user chooses to show activity
+  employeeId               Int?       @unique // Linked employee ID @unique @unique
+  resetPasswordToken       String?
+  resetPasswordTokenExpiry DateTime?
+  employee                 Employee?  @relation(fields: [employeeId], references: [employeeId]) // Relationship with the Employee model
+  roles                    UserRole[] // Relationship with UserRole for roles assignment
+
+  created_at DateTime @default(now()) // Timestamp when the user was created
+  updated_at DateTime @updatedAt // Timestamp when the user was last updated
+}
+
+// ============================ Employee Models ============================
+
+// Employee model represents an employee's details
+model Employee {
+  employeeId        Int                      @id @default(autoincrement()) // Unique employee identifier
+  designationId     Int // Linked designation ID
+  dateOfJoin        DateTime // Date when the employee joined
+  employmentType    EmploymentType
+  workingType       WorkingType
+  signatureUrl      String? // Optional signature URL
+  designation       Designation              @relation(fields: [designationId], references: [designationId]) // Relationship with Designation model
+  personalDetails   PersonalDetail? // Personal details of the employee
+  familyDetails     FamilyDetail[] // Family details linked to the employee
+  emergencyContacts EmergencyContactDetail[] // Emergency contact details linked to the employee
+  attachments       Attachment[] // Employee document attachments
+  user              User? // One-to-one relationship with the User model
+
+  address Address[] // Address details for the employee
+
+  educationalDetail EducationalDetail[] // Educational details for the employee
+
+  experienceDetail ExperienceDetail[] // Professional experience details for the employee
+}
+
+enum WorkingType {
+  Office
+  Remote
+  Hybrid
+}
+
+// ============================ Role Models ============================
+
+// Role model represents different roles that a user can have
+model Role {
+  roleId          Int        @id @default(autoincrement()) // Unique role identifier
+  roleName        String     @unique // Name of the role (e.g., Admin, Manager)
+  roleDescription String? // Optional description of the role
+  users           UserRole[] // Relationship with UserRole to link users with roles
+}
+
+// UserRole model defines the many-to-many relationship between users and roles
+model UserRole {
+  userRoleId Int  @id @default(autoincrement()) // Unique user-role relationship ID
+  userId     Int // User ID
+  roleId     Int // Role ID
+  user       User @relation(fields: [userId], references: [userId]) // Relationship with User model
+  role       Role @relation(fields: [roleId], references: [roleId]) // Relationship with Role model
+}
+
+// ============================ Designation Models ============================
+
+// Designation model defines the roles within the company
+model Designation {
+  designationId          Int        @id @default(autoincrement()) // Unique designation identifier
+  designationName        String     @unique // Name of the designation (e.g., Manager, Engineer)
+  designationDescription String? // Optional description of the designation
+  employees              Employee[] // List of employees with this designation
+}
+
+// ============================ Personal Details Models ============================
+
+// PersonalDetail model stores detailed personal information about the employee
+model PersonalDetail {
+  personalDetailId Int                 @id @default(autoincrement()) // Unique personal details ID
+  employeeId       Int                 @unique // Employee ID (one-to-one relationship with Employee)
+  dateOfBirth      DateTime // Employee's date of birth
+  age              Int // Employee's age
+  birthCountry     String // Country of birth
+  birthState       String // State of birth
+  birthLocation    String // Birth location
+  gender           Gender // Gender of the employee
+  maritalStatus    MaritalStatus // Marital status of the employee
+  dateOfMarriage   DateTime? // Optional date of marriage
+  bloodGroup       BloodGroup // Blood group of the employee
+  panNo            String // PAN number
+  caste            String // Caste
+  religion         String // Religion
+  domicile         String // Domicile
+  address          Address[] // Employee's address
+  educationDetail  EducationalDetail[] // Educational qualifications
+  employee         Employee            @relation(fields: [employeeId], references: [employeeId]) // Link to Employee model
+}
+
+// ============================ Enum Definitions ============================
+
+// Enum for gender types
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+// Enum for marital status types
+enum MaritalStatus {
+  Single
+  Married
+  Divorced
+  Widowed
+}
+
+// Enum for blood group types
+enum BloodGroup {
+  APlus
+  AMinus
+  BPlus
+  BMinus
+  ABPlus
+  ABMinus
+  OPlus
+  OMinus
+}
+
+// ============================ ProfessionalDetail Model============================
+
+model ProfessionalDetail {
+  professionalDetailId Int                @id @default(autoincrement())
+  employeeId           Int
+  experienceDetails    ExperienceDetail[]
+}
+
+// ============================ Address Models ============================
+
+// Address model stores employee address information
+model Address {
+  addressId       Int         @id @default(autoincrement()) // Unique address ID
+  employeeId      Int // Employee ID
+  addressType     AddressType // Address type (Present or Permanent)
+  buildingName    String // Building name
+  flatNumber      String // Flat number
+  streetName      String // Street name
+  landmark        String // Landmark
+  city            String // City
+  state           String // State
+  pincode         String // Pincode
+  telephoneNumber String? // Optional telephone number
+  mobileNumber    String // Mobile number
+  employee        Employee    @relation(fields: [employeeId], references: [employeeId]) // Relationship with Employee model
+
+  PersonalDetail PersonalDetail[] // Personal details linked to this address
+}
+
+// Enum for address types (Present or Permanent)
+enum AddressType {
+  Present
+  Permanent
+}
+
+// ============================ Educational Models ============================
+
+// EducationalDetail model stores employee educational details
+model EducationalDetail {
+  educationId             Int             @id @default(autoincrement()) // Unique educational detail ID
+  employeeId              Int // Employee ID
+  course                  CourseType // Type of course (e.g., Std10th, Graduation)
+  degreeSpecialization    String // Degree or specialization
+  instituteUniversityName String // Name of the institute or university
+  fromDate                DateTime // Start date of education
+  toDate                  DateTime // End date of education
+  status                  EducationStatus // Education status (e.g., Completed, InProcess)
+  studyMode               StudyMode // Study mode (FullTime, Correspondence, etc.)
+  percentage              Float // Percentage or marks obtained
+  employee                Employee        @relation(fields: [employeeId], references: [employeeId]) // Link to Employee model
+
+  PersonalDetail PersonalDetail[] // Personal details related to education
+}
+
+// Enum for course types (e.g., Std10th, Graduation)
+enum CourseType {
+  Std10th
+  Std12th
+  Graduation
+  PostGraduation
+  Others
+}
+
+// Enum for education status (Completed, InProcess, Dropped)
+enum EducationStatus {
+  Completed
+  InProcess
+  Dropped
+}
+
+// Enum for study modes (FullTime, PartTime, etc.)
+enum StudyMode {
+  FullTime
+  Correspondence
+  PartTime
+}
+
+// ============================ Experience Models ============================
+
+// ExperienceDetail model stores employee professional experience
+model ExperienceDetail {
+  experienceId    Int            @id @default(autoincrement()) // Unique experience ID
+  employeeId      Int // Employee ID
+  empName         String // Name of the company
+  empId           String // Employee ID in the company
+  jobTitle        String // Job title
+  startDate       DateTime // Start date of employment
+  endDate         DateTime? // End date of employment
+  country         String // Country where the job was
+  city            String // City of the job
+  state           String // State of the job
+  employmentType  EmploymentType // Type of employment (FullTime, Internship, etc.)
+  supervisorName  String? // Optional supervisor name
+  supervisorMobNo String? // Optional supervisor contact number
+  employee        Employee       @relation(fields: [employeeId], references: [employeeId]) // Link to Employee model
+
+  ProfessionalDetail ProfessionalDetail[] // Professional details related to the job
+}
+
+// Enum for employment types (FullTime, PartTime, Internship)
+enum EmploymentType {
+  FullTime
+  PartTime
+  Internship
+}
+
+// ============================ Family Models ============================
+
+// FamilyDetail model stores family member information
+model FamilyDetail {
+  familyId       Int            @id @default(autoincrement())
+  employeeId     Int
+  relationType   FamilyRelation
+  name           String
+  age            Int
+  dateOfBirth    DateTime
+  currentAddress String
+  birthCountry   String
+  birthState     String
+  birthLocation  String
+  occupation     String
+  mobileNumber   String
+  employee       Employee       @relation(fields: [employeeId], references: [employeeId])
+}
+
+// Enum for family relations (Father, Mother, etc.)
+enum FamilyRelation {
+  Father
+  Mother
+  Brother
+  Sister
+  Spouse
+  Other
+}
+
+// ============================ Emergency Contact Models ============================
+
+// EmergencyContactDetail model stores emergency contact information
+model EmergencyContactDetail {
+  emergencyContactId Int      @id @default(autoincrement())
+  employeeId         Int
+  contactName        String
+  contactAddress     String
+  relationToEmployee String
+  contactNumber      String
+  employee           Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+// ============================ Attachment Models ============================
+
+// Attachment model stores document attachments for the employee
+model Attachment {
+  attachmentId   Int          @id @default(autoincrement()) // Unique attachment ID
+  employeeId     Int // Employee ID
+  documentType   DocumentType
+  documentUrl    String
+  submitted      Boolean
+  submissionDate DateTime
+  employee       Employee     @relation(fields: [employeeId], references: [employeeId])
+}
+
+enum DocumentType {
+  DegreeCertificatesMarksheets
+  BirthProof
+  ExperienceCertificate
+  RelievingLetter
+  AadharPhotoCopy
+  PanPhotoCopy
+}
