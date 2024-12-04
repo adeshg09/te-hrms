@@ -50,182 +50,184 @@ const AddressDetailsForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5 w-full h-full "
+        className="flex flex-col gap-5 w-full h-full rounded-lg "
       >
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="addressType"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Address Type</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+        <div className="flex flex-col gap-5  overflow-y-scroll md:h-[330px] sm:h-[324px] h-[344px]  scrollbar-none ">
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="addressType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select address type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Present">Present</SelectItem>
+                      <SelectItem value="Permanent">Permanent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="buildingName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
                   <FormControl>
-                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                      <SelectValue placeholder="Select address type" />
-                    </SelectTrigger>
+                    <Input
+                      placeholder="Enter building name"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Present">Present</SelectItem>
-                    <SelectItem value="Permanent">Permanent</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="buildingName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Building Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter building name"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="flatNumber"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Flat Number</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter flat number"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="flatNumber"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      placeholder="Enter flat number"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="streetName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Street Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter street name"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="landmark"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Landmark</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter landmark"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter city"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="streetName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      placeholder="Enter street name"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="landmark"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      placeholder="Enter landmark"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      placeholder="Enter city"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="state"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>State</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter state"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="pincode"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Pincode</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Enter pincode"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="mobileNumber"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Mobile Number</FormLabel>
-                <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder="Enter mobile number"
-                    {...field}
-                    className="rounded-lg h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      placeholder="Enter state"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="pincode"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter pincode"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="mobileNumber"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  
+                  <FormControl>
+                    <Input
+                      type="tel"
+                      placeholder="Enter mobile number"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-5  justify-end">
-        <Button
+          <Button
             type="submit"
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
             size="lg"

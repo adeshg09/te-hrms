@@ -70,7 +70,7 @@ const AddRole = () => {
           onClick={() => setOpen(true)}
         >
           <Plus className="h-4 w-4 text-white" />
-          <span className="ml-2">Add New Role</span>
+          <span className="ml-2 sm:block hidden">Add New Role</span>
         </Button>
       </DialogTrigger>
 

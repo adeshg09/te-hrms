@@ -17,7 +17,7 @@ const ThemeModeToggle = () => {
   const { mode, setMode } = useTheme();
 
   return (
-    <div className='absolute top-3 right-3 rounded-full'>
+    <div className=' top-3 right-3 rounded-full'>
       <Menubar className="relative border-none bg-transparent shadow-none ">
       <MenubarMenu>
           

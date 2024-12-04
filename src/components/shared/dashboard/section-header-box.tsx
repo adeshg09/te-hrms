@@ -30,7 +30,7 @@ const SectionHeaderBox = ({ link, title, type }: SectionHeaderBoxProps) => {
         <IoSearchOutline className="absolute left-3 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400 " />
       </div>
 
-      <div className="flex items-center   gap-3 sm:gap-5 w-full  sm:justify-end ">
+      <div className="flex items-center   gap-3 sm:gap-5 w-full justify-end ">
         {type === 'designation' ? (
           <AddDesignation />
         ) : type === 'role' ? (
@@ -43,7 +43,7 @@ const SectionHeaderBox = ({ link, title, type }: SectionHeaderBoxProps) => {
             }}
           >
             <FaCirclePlus className="h-4 w-4 text-white" />
-            <span className="ml-2">{title}</span>
+            <span className="ml-2 sm:block hidden">{title}</span>
           </Button>
         )}
 

@@ -58,92 +58,94 @@ const EmergencyContactDetailsForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5 w-full h-full "
+        className="flex flex-col gap-5 w-full h-full rounded-lg "
       >
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="contactName"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    placeholder="Enter contact name"
-                    {...field}
-                    className="rounded-lg h-12"
-                    aria-required="true"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
+        <div className="flex flex-col gap-5  overflow-y-scroll md:h-[330px] sm:h-[324px] h-[344px]  scrollbar-none ">
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="contactName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Enter contact name"
+                      {...field}
+                      className="rounded-lg h-12"
+                      aria-required="true"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
 
-          {/* Emergency Contact Address */}
-          <FormField
-            control={form.control}
-            name="contactAddress"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    placeholder="Enter contact address"
-                    {...field}
-                    className="rounded-lg h-12"
-                    aria-required="true"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
-        </div>
-        {/* Emergency Contact Name */}
+            {/* Emergency Contact Address */}
+            <FormField
+              control={form.control}
+              name="contactAddress"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Enter contact address"
+                      {...field}
+                      className="rounded-lg h-12"
+                      aria-required="true"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
+          {/* Emergency Contact Name */}
 
-        <div className="flex flex-col gap-5 md:flex-row">
-          {/* Relation to Employee */}
-          <FormField
-            control={form.control}
-            name="relationToEmployee"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    placeholder="Enter relation to employee"
-                    {...field}
-                    className="rounded-lg h-12"
-                    aria-required="true"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
+          <div className="flex flex-col gap-5 md:flex-row">
+            {/* Relation to Employee */}
+            <FormField
+              control={form.control}
+              name="relationToEmployee"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Enter relation to employee"
+                      {...field}
+                      className="rounded-lg h-12"
+                      aria-required="true"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
 
-          {/* Emergency Contact Number */}
-          <FormField
-            control={form.control}
-            name="contactNumber"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder="Enter contact number"
-                    {...field}
-                    className="rounded-lg h-12"
-                    aria-required="true"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
+            {/* Emergency Contact Number */}
+            <FormField
+              control={form.control}
+              name="contactNumber"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      type="tel"
+                      placeholder="Enter contact number"
+                      {...field}
+                      className="rounded-lg h-12"
+                      aria-required="true"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         {/* Submit and Back Buttons */}
         <div className="flex items-center gap-5  justify-end">
-        <Button
+          <Button
             type="submit"
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
             size="lg"

@@ -69,7 +69,7 @@ const AddDesignation = () => {
           onClick={() => setOpen(true)}
         >
           <Plus className="h-4 w-4 text-white" />
-          <span className="ml-2">Add New Designation</span>
+          <span className="ml-2 hidden sm:block">Add New Designation</span>
         </Button>
       </DialogTrigger>
 

@@ -79,155 +79,177 @@ const ProfBasicDetailsForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5 w-full h-full "
+        className="flex flex-col gap-5 w-full h-full rounded-lg "
       >
         {/* Designation */}
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="designation"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                      <SelectValue placeholder="Select designation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {designations.map((designation) => (
-                        <SelectItem
-                          key={designation.designationId}
-                          value={designation.designationName}
+        <div  className="flex flex-col gap-5  overflow-y-scroll md:h-[330px] sm:h-[324px] h-[344px]  scrollbar-none ">
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="designation"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select designation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {designations.map((designation) => (
+                          <SelectItem
+                            key={designation.designationId}
+                            value={designation.designationName}
+                          >
+                            {designation.designationName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Employment Type */}
+            <FormField
+              control={form.control}
+              name="employmentType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select employment type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FullTime">Full-Time</SelectItem>
+                        <SelectItem value="PartTime">Part-Time</SelectItem>
+                        <SelectItem value="Internship">Internship</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="workingType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select working type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Office">Office</SelectItem>
+                        <SelectItem value="Remote">Remote</SelectItem>
+                        <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Date of Joining */}
+            <FormField
+              control={form.control}
+              name="dateOfJoin"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Popover>
+                    <PopoverTrigger
+                      asChild
+                      className="rounded-lg h-12 bg-white border-grey-200"
+                    >
+                      <FormControl>
+                        <Button
+                          variant={'outline'}
+                          className={`w-full pl-3 text-left font-normal ${
+                            !field.value && 'text-muted-foreground'
+                          }`}
                         >
-                          {designation.designationName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Employment Type */}
-          <FormField
-            control={form.control}
-            name="employmentType"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                      <SelectValue placeholder="Select employment type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="FullTime">Full-Time</SelectItem>
-                      <SelectItem value="PartTime">Part-Time</SelectItem>
-                      <SelectItem value="Internship">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="flex flex-col gap-5 md:flex-row">
-          <FormField
-            control={form.control}
-            name="workingType"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                      <SelectValue placeholder="Select working type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Office">Office</SelectItem>
-                      <SelectItem value="Remote">Remote</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Date of Joining */}
-          <FormField
-            control={form.control}
-            name="dateOfJoin"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <Popover>
-                  <PopoverTrigger
-                    asChild
-                    className="rounded-lg h-12 bg-white border-grey-200"
-                  >
-                    <FormControl>
-                      <Button
-                        variant={'outline'}
-                        className={`w-full pl-3 text-left font-normal ${
-                          !field.value && 'text-muted-foreground'
-                        }`}
-                      >
-                        {field.value ? (
-                          format(new Date(field.value), 'PPP')
-                        ) : (
-                          <span>Enter Date Of Join</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date?.toISOString())}
-                      disabled={(date) =>
-                        date > new Date() || date < new Date('1900-01-01')
-                      }
-                      initialFocus
+                          {field.value ? (
+                            format(new Date(field.value), 'PPP')
+                          ) : (
+                            <span>Enter Date Of Join</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date) => field.onChange(date?.toISOString())}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date('1900-01-01')
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex flex-col gap-5 md:flex-row">
+            {/* Signature URL */}
+            <FormField
+              control={form.control}
+              name="signatureUrl"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="Enter signature URL"
+                      {...field}
+                      className="rounded-lg h-12"
                     />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage className="text-sm text-red-600" />
-              </FormItem>
-            )}
-          />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="signatureUrl"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      type="url"
+                      placeholder="Enter signature URL"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
-
-        {/* Signature URL */}
-        <FormField
-          control={form.control}
-          name="signatureUrl"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormControl>
-                <Input
-                  type="url"
-                  placeholder="Enter signature URL"
-                  {...field}
-                  className="rounded-lg h-12"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {/* Submit Button */}
         <div className="flex items-center gap-5  justify-end">

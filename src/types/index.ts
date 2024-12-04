@@ -15,3 +15,9 @@ export type resetJWTPayload ={
     action: string
 }
 
+export type Role = {
+    roleId: number;
+    roleName: string;
+    roleDescription: string;
+  };
+

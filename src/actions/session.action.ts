@@ -12,7 +12,6 @@ if (!secretKey) {
   throw new Error('SESSION_SECRET environment variable is not set.');
 }
 const encodedKey = new TextEncoder().encode(secretKey);
-
 const alg = 'HS256';
 
 export const verifyCredentials = async (email: string, password: string) => {
@@ -69,6 +68,74 @@ export const encrypt = async (payload: JWTPayload,remember?:boolean) => {
   }
 };
 
+export const decrypt=async(token:string)=>{
+  try{
+    const {payload}=await jwtVerify(token,encodedKey,{
+      algorithms:['HS256']
+    })
+    return payload
+  }catch(e){
+    console.error('Error decrypting token:', e);
+    return {error: 'Invalid token'};
+  }
+}
+
+// actions/session.action.ts
+export const verifyToken = async (token?: string) => {
+  try {
+    if (!token) {
+      return { success: false, error: 'No token provided' };
+    }
+
+    const { payload } = await jwtVerify(token, encodedKey);
+    console.log("payload is",payload)
+
+    // Optional: Add check for token expiration
+    const currentTime = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < currentTime) {
+      return { 
+        success: false, 
+        error: 'Token expired',
+        shouldLogout: true // Optional flag to trigger logout
+      };
+    }
+
+    return { 
+      success: true, 
+      payload: payload,
+      isRemembered: payload.isRemembered || false
+    };
+  } catch (error) {
+    console.error('Failed to verify session', error);
+    return { 
+      success: false, 
+      error: 'Invalid or expired token',
+      shouldLogout: true
+    };
+  }
+};
+
+// Add a new method to get current user from session
+export const getCurrentUser = async () => {
+  try {
+    const cookieStore = cookies();
+    const token = (await cookieStore).get('auth-token')?.value;
+
+    if (!token) {
+      return null;
+    }
+
+    const verificationResult = await verifyToken(token);
+    
+    return verificationResult.success ? verificationResult?.payload?.user : null;
+  } catch (error) {
+    return null;
+  }
+};
+
+
+
+
 export const createSession = async (user: User,remember?:boolean) => {
   try {
     const expiresAt = remember 
@@ -121,60 +188,4 @@ export const deleteSession = async () => {
   }
 };
 
-// actions/session.action.ts
-export const verifyToken = async (token?: string) => {
-  try {
-    if (!token) {
-      return { success: false, error: 'No token provided' };
-    }
 
-    const { payload } = await jwtVerify(token, encodedKey);
-    console.log("payload is",payload)
-
-    // Additional check to ensure payload contains user info
-    // if (!payload.user ) {
-    //   return { success: false, error: 'Invalid token payload' };
-    // }
-
-    // Optional: Add check for token expiration
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < currentTime) {
-      return { 
-        success: false, 
-        error: 'Token expired',
-        shouldLogout: true // Optional flag to trigger logout
-      };
-    }
-
-    return { 
-      success: true, 
-      payload: payload,
-      isRemembered: payload.isRemembered || false
-    };
-  } catch (error) {
-    console.error('Failed to verify session', error);
-    return { 
-      success: false, 
-      error: 'Invalid or expired token',
-      shouldLogout: true
-    };
-  }
-};
-
-// Add a new method to get current user from session
-export const getCurrentUser = async () => {
-  try {
-    const cookieStore = cookies();
-    const token = (await cookieStore).get('auth-token')?.value;
-
-    if (!token) {
-      return null;
-    }
-
-    const verificationResult = await verifyToken(token);
-    
-    return verificationResult.success ? verificationResult?.payload?.user : null;
-  } catch (error) {
-    return null;
-  }
-};

@@ -40,16 +40,20 @@ export const basicDetailsSchema = z.object({
     })
   )
   .optional(),
-  isActive: z.boolean().default(true),
-  showActivity: z.boolean().default(true),
-  dateOfBirth: z.string().transform((val) => new Date(val)),
+  isActive: z.boolean().default(true).optional(),
+  showActivity: z.boolean().default(true).optional(),
+  dateOfBirth: z.date({
+    required_error: "Date of birth is required",
+    invalid_type_error: "Date of birth must be a valid date"
+  }).refine((date) => {
+    // Optional: Add age validation (e.g., minimum 18 years old)
+    const today = new Date();
+    const minAgeDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+    return date <= minAgeDate;
+  }, { message: "Must be at least 18 years old" }),
   age: z.number().min(18, 'Age must be at least 18'),
   gender: z.enum(['Male', 'Female', 'Other']),
   maritalStatus: z.enum(['Single', 'Married', 'Divorced', 'Widowed']),
-  dateOfMarriage: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)).optional(),
   bloodGroup: z.enum([
     'APlus',
     'AMinus',
@@ -84,18 +88,24 @@ export const addressDetailsSchema = z.object({
 
 export const educationalDetailsSchema = z.object({
   course: z.enum([
-    'Std10th',
-    'Std12th',
+    'Std 10th',
+    'Std 12th',
     'Graduation',
-    'PostGraduation',
+    'Post Graduation',
     'Others',
   ]),
   degreeSpecialization: z.string().min(1, 'Specialization is required'),
   instituteUniversityName: z.string().min(1, 'Institute name is required'),
-  fromDate: z.string().transform((val) => new Date(val)),
-  toDate: z.string().transform((val) => new Date(val)),
-  status: z.enum(['Completed', 'InProcess', 'Dropped']),
-  studyMode: z.enum(['FullTime', 'Correspondence', 'PartTime']),
+  fromDate:z.date({
+    required_error: "Start Date is required",
+    invalid_type_error: "Start Datemust be a valid date"
+  }),
+  toDate:z.date({
+    required_error: "End Date is required",
+    invalid_type_error: "End Date must be a valid date"
+  }),
+  status: z.enum(['Completed', 'In Process', 'Dropped']),
+  studyMode: z.enum(['Full Time', 'Correspondence', 'Part Time']),
   percentage: z.number().min(0, 'Percentage must be a positive number'),
 });
 

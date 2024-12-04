@@ -69,7 +69,7 @@ enum WorkingType {
 model Role {
   roleId          Int        @id @default(autoincrement()) // Unique role identifier
   roleName        String     @unique // Name of the role (e.g., Admin, Manager)
-  roleDescription String? // Optional description of the role
+  roleDescription String // Optional description of the role
   users           UserRole[] // Relationship with UserRole to link users with roles
 }
 

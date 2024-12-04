@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import UserBox from './user-box';
 import { sidebarLinks } from '@/constants';
+import ThemeModeToggle from '@/components/theme-mode-toggle';
 
 const Sidebar = () => {
   const pathName = usePathname();
 
   return (
-    <section className="sticky top-0 left-0 flex flex-col items-center justify-between md:w-64 sm:w-52 w-16 bg-grey-50 md:p-4 sm:p-3 p-2 xl:p-6 h-full z-50 rounded-lg ">
-      <div className="flex flex-col w-full h-full gap-6  rounded-lg">
+    <section className="sticky top-0 left-0 flex flex-col items-center justify-between md:w-64 sm:w-52 w-16 bg-grey-50 md:p-4 sm:p-3 p-2 xl:p-6 z-50 rounded-lg h-full ">
+      <div className="flex flex-col w-full h-full gap-6  rounded-lg ">
         <div className="flex flex-col gap-4 items-center justify-center rounded-lg">
           <Link href="/" className="flex items-center gap-2">
             <img
@@ -71,10 +72,16 @@ const Sidebar = () => {
             );
           })}
         </div>
+
+        <div className='sm:hidden'>
+          <ThemeModeToggle/>
+        </div>
+        
       </div>
+     
 
       {/* User Profile Section */}
-      {/* <UserBox /> */}
+      
     </section>
   );
 };
