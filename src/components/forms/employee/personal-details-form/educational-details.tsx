@@ -38,6 +38,7 @@ import { EducationDetailsFormData } from '@/types/form';
 
 import { educationCourse, educationStatus, studyMode } from '@/constants';
 import { format } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const EducationalDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,16 +62,16 @@ const EducationalDetailsForm = () => {
   const form = useForm<EducationDetailsFormData>({
     resolver: zodResolver(educationalDetailsSchema),
     defaultValues: {
-      course: formData.educationalDetails?.[0]?.course || 'Std10th',
+      course: formData.educationalDetails?.[0]?.course || undefined,
       degreeSpecialization:
         formData.educationalDetails?.[0]?.degreeSpecialization || '',
       instituteUniversityName:
         formData.educationalDetails?.[0]?.instituteUniversityName || '',
-      status: formData.educationalDetails?.[0]?.status || 'Completed',
-      studyMode: formData.educationalDetails?.[0]?.studyMode || 'FullTime',
+      status: formData.educationalDetails?.[0]?.status || undefined,
+      studyMode: formData.educationalDetails?.[0]?.studyMode || undefined,
       fromDate: formData.educationalDetails?.[0]?.fromDate,
       toDate: formData.educationalDetails?.[0]?.toDate,
-      percentage: formData.educationalDetails?.[0]?.percentage || 100,
+      percentage: formData.educationalDetails?.[0]?.percentage || '',
     },
   });
 
@@ -85,6 +86,7 @@ const EducationalDetailsForm = () => {
       updateFormData({
         educationalDetails: updatedEntries,
       });
+      toast.success(" Education Details added Successfully");
 
       // Reset form to default values after adding
       form.reset();
@@ -162,7 +164,7 @@ const EducationalDetailsForm = () => {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        
         className="flex flex-col gap-5 w-full h-full rounded-lg"
       >
         <div className="flex flex-col gap-5 overflow-y-scroll h-[290px] scrollbar-none">
@@ -237,11 +239,14 @@ const EducationalDetailsForm = () => {
                 <FormItem className="w-full">
                   <FormControl>
                     <Input
-                      type="number"
                       placeholder="Enter percentage"
                       {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
                       className="rounded-lg h-12"
+                      value={field.value}
+                      onChange={(e) => {
+                        // Directly set the string value while allowing transformation in Zod
+                        field.onChange(e.target.value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage className="text-sm text-red-600" />
@@ -267,6 +272,7 @@ const EducationalDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder="Pick a start date"
                         />
                       )}
                     />
@@ -290,6 +296,7 @@ const EducationalDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder="Pick a end date"
                         />
                       )}
                     />
@@ -360,7 +367,7 @@ const EducationalDetailsForm = () => {
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
           <Button
-            type="submit"
+          onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}
@@ -406,7 +413,7 @@ const EducationalDetailsForm = () => {
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
-              
+
               <TableBody>
                 {educationDetailsEntries.map((entry, index) => (
                   <TableRow key={index}>

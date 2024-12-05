@@ -34,6 +34,7 @@ import {
 import { addressDetailsSchema } from '@/lib/validations';
 import { useMultiStepForm } from '@/hooks/use-multistep-form';
 import { AddressDetailsFormData } from '@/types/form';
+import toast from 'react-hot-toast';
 
 const AddressDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +58,7 @@ const AddressDetailsForm = () => {
   const form = useForm<AddressDetailsFormData>({
     resolver: zodResolver(addressDetailsSchema),
     defaultValues: {
-      addressType: existingAddressDetails[0]?.addressType || 'Present',
+      addressType: existingAddressDetails[0]?.addressType || undefined,
       buildingName: existingAddressDetails[0]?.buildingName || '',
       flatNumber: existingAddressDetails[0]?.flatNumber || '',
       streetName: existingAddressDetails[0]?.streetName || '',
@@ -81,22 +82,14 @@ const AddressDetailsForm = () => {
       updateFormData({
         addressDetails: updatedEntries,
       });
+      toast.success(" Address Details added Successfully");
 
       // Reset form to default values after adding
-      form.reset({
-        addressType: 'Present',
-        buildingName: '',
-        flatNumber: '',
-        streetName: '',
-        landmark: '',
-        city: '',
-        state: '',
-        pincode: '',
-        telephoneNumber: '',
-        mobileNumber: '',
-      });
+      form.reset();
     })();
   };
+
+
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -338,7 +331,7 @@ const AddressDetailsForm = () => {
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
           <Button
-            type="submit"
+          onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}

@@ -115,14 +115,15 @@ export const addNewEmployeeSteps = [
 ];
 
 export const bloodGroups = [
-  'APlus',
-  'AMinus',
-  'BPlus',
-  'BMinus',
-  'ABPlus',
-  'ABMinus',
-  'OPlus',
-  'OMinus',
+  {label:'A+',value:'APlus'},
+  {label:'A-',value:'AMinus'},
+  {label:'B+',value:'BPlus'},
+  {label:'B-',value:'BMinus'},
+  {label:'AB+',value:'ABPlus'},
+  {label:'AB-',value:'ABMinus'},
+  {label:'O+',value:'OPlus'},
+  {label:'O-',value:'OMinus'},
+  
 ];
 
 export const marritalStatus = ['Married', 'Single', 'Divorced', 'Widowed'];

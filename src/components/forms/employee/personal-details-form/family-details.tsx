@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -37,6 +37,8 @@ import { useMultiStepForm } from '@/hooks/use-multistep-form';
 import { FamilyDetailsFormData } from '@/types/form';
 import { DatePicker } from '@/components/ui/custom-datepicker';
 import { familyRelation } from '@/constants';
+import { calculateAge } from '@/lib/utilities/age-utility';
+import toast from 'react-hot-toast';
 
 const FamilyDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -60,9 +62,9 @@ const FamilyDetailsForm = () => {
   const form = useForm<FamilyDetailsFormData>({
     resolver: zodResolver(familyDetailsSchema),
     defaultValues: existingFamilyDetails[0] || {
-      relationType: 'Father',
+      relationType: '',
       name: '',
-      age: 18,
+      age: undefined,
       dateOfBirth: undefined,
       currentAddress: '',
       occupation: '',
@@ -73,8 +75,33 @@ const FamilyDetailsForm = () => {
     },
   });
 
+  // State to track calculated age
+  const [calculatedAge, setCalculatedAge] = useState<number | undefined>(
+    existingFamilyDetails[0]?.age,
+  );
+
+  // Watch the dateOfBirth field to automatically calculate age
+  const watchDateOfBirth = form.watch('dateOfBirth');
+
+  useEffect(() => {
+    // Automatically calculate and set age when date of birth changes
+    if (watchDateOfBirth) {
+      const newCalculatedAge = calculateAge(watchDateOfBirth);
+      setCalculatedAge(newCalculatedAge);
+      form.setValue('age', newCalculatedAge, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [watchDateOfBirth, form]);
+
   const addEntry = () => {
     form.handleSubmit((values) => {
+      // Ensure age is calculated from dateOfBirth if not manually set
+      if (!values.age && values.dateOfBirth) {
+        values.age = calculateAge(values.dateOfBirth);
+      }
+
       const updatedEntries = [...familyDetailsEntries, values];
 
       // Update local state
@@ -84,20 +111,13 @@ const FamilyDetailsForm = () => {
       updateFormData({
         familyDetails: updatedEntries,
       });
+      toast.success(" Family Details added Successfully");
 
       // Reset form to default values after adding
-      form.reset({
-        relationType: 'Father',
-        name: '',
-        age: 18,
-        dateOfBirth: undefined,
-        currentAddress: '',
-        occupation: '',
-        mobileNo: '',
-        birthCountry: '',
-        birthState: '',
-        birthLocation: '',
-      });
+      form.reset();
+
+      // Reset calculated age
+      setCalculatedAge(undefined);
     })();
   };
 
@@ -226,25 +246,6 @@ const FamilyDetailsForm = () => {
           <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
-              name="age"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Enter age"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      className="rounded-lg h-12"
-                      aria-required="true"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="dateOfBirth"
               render={({ field }) => (
                 <FormItem className="flex flex-col w-full">
@@ -258,8 +259,35 @@ const FamilyDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder="Pick Date Of Birth"
                         />
                       )}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="age"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      placeholder={`Age ${calculatedAge ? `(Calculated: ${calculatedAge})` : ''}`}
+                      value={field.value ?? calculatedAge ?? ''}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ''
+                            ? undefined
+                            : Number(e.target.value);
+                        field.onChange(value);
+                        setCalculatedAge(value);
+                      }}
+                      className="rounded-lg h-12"
                     />
                   </FormControl>
                   <FormMessage className="text-sm text-red-600" />
@@ -380,7 +408,7 @@ const FamilyDetailsForm = () => {
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
           <Button
-            type="submit"
+          onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}

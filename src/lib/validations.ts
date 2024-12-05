@@ -28,8 +28,6 @@ export const createDesignationSchema = z.object({
   description: z.string().min(3, 'Description must be at least 3 characters'),
 });
 
-
-
 // employee onboarding forms schema
 
 export const basicDetailsSchema = z.object({
@@ -47,24 +45,10 @@ export const basicDetailsSchema = z.object({
   ),
   isActive: z.boolean().default(true),
   showActivity: z.boolean().default(true),
-  dateOfBirth: z
-    .date({
-      required_error: 'Date of birth is required',
-      invalid_type_error: 'Date of birth must be a valid date',
-    })
-    .refine(
-      (date) => {
-        // Optional: Add age validation (e.g., minimum 18 years old)
-        const today = new Date();
-        const minAgeDate = new Date(
-          today.getFullYear() - 18,
-          today.getMonth(),
-          today.getDate(),
-        );
-        return date <= minAgeDate;
-      },
-      { message: 'Must be at least 18 years old' },
-    ),
+  dateOfBirth: z.date({
+    required_error: 'Date of birth is required',
+    invalid_type_error: 'Date of birth must be a valid date',
+  }),
   age: z.number().min(18, 'Age must be at least 18'),
   gender: z.enum(['Male', 'Female', 'Other']),
   maritalStatus: z.enum(['Single', 'Married', 'Divorced', 'Widowed']),
@@ -81,7 +65,11 @@ export const basicDetailsSchema = z.object({
   birthCountry: z.string().min(1, 'Birth country is required'),
   birthState: z.string().min(1, 'Birth state is required'),
   birthLocation: z.string().min(1, 'Birth location is required'),
-  panNo: z.string().min(10, 'PAN number must be 10 characters'),
+  panNo: z
+    .string()
+    .min(10, 'PAN number must be 10 characters')
+    .max(10, 'PAN number must be 10 characters')
+    .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN number format'),
   caste: z.string().min(1, 'Caste is required'),
   religion: z.string().min(1, 'Religion is required'),
   domicile: z.string().min(1, 'Domicile is required'),
@@ -112,7 +100,7 @@ export const educationalDetailsSchema = z.object({
   instituteUniversityName: z.string().min(1, 'Institute name is required'),
   fromDate: z.date({
     required_error: 'Start Date is required',
-    invalid_type_error: 'Start Datemust be a valid date',
+    invalid_type_error: 'Start Date must be a valid date',
   }),
   toDate: z.date({
     required_error: 'End Date is required',
@@ -120,7 +108,14 @@ export const educationalDetailsSchema = z.object({
   }),
   status: z.enum(['Completed', 'InProcess', 'Dropped']),
   studyMode: z.enum(['FullTime', 'Correspondence', 'PartTime']),
-  percentage: z.number().min(0, 'Percentage must be a positive number'),
+  percentage: z
+    .union([
+      z.string().transform((val) => parseFloat(val)),
+      z.number()
+    ])
+    .refine((val) => !isNaN(val) && val >= 0 && val <= 100, {
+      message: 'Percentage must be a valid number between 0 and 100',
+    }),
 });
 
 export const familyDetailsSchema = z.object({

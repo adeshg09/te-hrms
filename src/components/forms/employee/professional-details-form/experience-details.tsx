@@ -38,6 +38,7 @@ import { ExperienceDetailsFormData } from '@/types/form';
 
 import { format } from 'date-fns';
 import { employementType } from '@/constants';
+import toast from 'react-hot-toast';
 
 const ExperienceDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -87,6 +88,7 @@ const ExperienceDetailsForm = () => {
       updateFormData({
         experienceDetails: updatedEntries,
       });
+      toast.success(" Experience Details added Successfully");
 
       // Reset form to default values after adding
       form.reset();
@@ -250,6 +252,7 @@ const ExperienceDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder='Pick a start date'
                         />
                       )}
                     />
@@ -273,6 +276,7 @@ const ExperienceDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder='Pick an end date'
                         />
                       )}
                     />
@@ -375,7 +379,7 @@ const ExperienceDetailsForm = () => {
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
           <Button
-            type="submit"
+          onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}
@@ -399,7 +403,7 @@ const ExperienceDetailsForm = () => {
             {isLoading ? (
               <Loader2 className="animate-spin h-5 w-5" />
             ) : (
-              'Add Experience'
+              'Add Education'
             )}
           </Button>
         </div>

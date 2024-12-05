@@ -35,6 +35,7 @@ import { useMultiStepForm } from '@/hooks/use-multistep-form';
 import { BasicDetailsFormData } from '@/types/form';
 import toast from 'react-hot-toast';
 import { Card } from '@/components/ui/card';
+import { calculateAge } from '@/lib/utilities/age-utility';
 
 // Helper function for simulated profile upload
 async function uploadProfileToCloudStorage(file: File): Promise<string> {
@@ -78,10 +79,10 @@ const BasicDetailsForm = () => {
       isActive: formData.basicDetails?.isActive ?? true,
       showActivity: formData.basicDetails?.showActivity ?? true,
       dateOfBirth: formData.basicDetails?.dateOfBirth || undefined,
-      age: formData.basicDetails?.age || 18,
-      gender: formData.basicDetails?.gender || 'Male',
-      maritalStatus: formData.basicDetails?.maritalStatus || 'Single',
-      bloodGroup: formData.basicDetails?.bloodGroup || 'APlus',
+      age: formData.basicDetails?.age || undefined,
+      gender: formData.basicDetails?.gender || undefined,
+      maritalStatus: formData.basicDetails?.maritalStatus || undefined,
+      bloodGroup: formData.basicDetails?.bloodGroup || undefined,
       birthCountry: formData.basicDetails?.birthCountry || '',
       birthState: formData.basicDetails?.birthState || '',
       birthLocation: formData.basicDetails?.birthLocation || '',
@@ -91,7 +92,9 @@ const BasicDetailsForm = () => {
       domicile: formData.basicDetails?.domicile || '',
     },
   });
-
+  const [calculatedAge, setCalculatedAge] = useState<number | undefined>(
+    formData.basicDetails?.age,
+  );
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -118,6 +121,21 @@ const BasicDetailsForm = () => {
 
     fetchRoles();
   }, [formData.basicDetails?.roles]);
+
+  // Watch the dateOfBirth field to automatically calculate age
+  const watchDateOfBirth = form.watch('dateOfBirth');
+
+  useEffect(() => {
+    // Automatically calculate and set age when date of birth changes
+    if (watchDateOfBirth) {
+      const newCalculatedAge = calculateAge(watchDateOfBirth);
+      setCalculatedAge(newCalculatedAge);
+      form.setValue('age', newCalculatedAge, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+  }, [watchDateOfBirth, form]);
 
   const handleProfileUpload = async (file: File) => {
     // Validate file type
@@ -159,25 +177,33 @@ const BasicDetailsForm = () => {
     form.setValue('profileUrl', '');
   };
 
+  const onNext=()=>{
+    if (currentSubStep < 4) {
+      // Move to next substep within Personal Details
+      setCurrentSubStep(currentSubStep + 1);
+    } else {
+      // When all substeps are complete, move to next main step
+      // In this case, move to 'Professional Details'
+      setActiveStep('Professional Details');
+      // Reset substep to 0 when moving to a new main step
+      setCurrentSubStep(0);
+    }
+  }
+
   const onSubmit = async (values: BasicDetailsFormData) => {
     setIsLoading(true);
     try {
       // Update form data in context
+      if (!values.age && values.dateOfBirth) {
+        values.age = calculateAge(values.dateOfBirth);
+      }
       updateFormData({
         basicDetails: values,
       });
+      toast.success("Personal Basic Details Submitted Successfully");
 
       // Navigation logic for substeps and main steps
-      if (currentSubStep < 4) {
-        // Move to next substep within Personal Details
-        setCurrentSubStep(currentSubStep + 1);
-      } else {
-        // When all substeps are complete, move to next main step
-        // In this case, move to 'Professional Details'
-        setActiveStep('Professional Details');
-        // Reset substep to 0 when moving to a new main step
-        setCurrentSubStep(0);
-      }
+      
     } catch (error) {
       console.error('Submission error:', error);
       // Optionally, handle error states
@@ -334,7 +360,7 @@ const BasicDetailsForm = () => {
             />
           </div>
 
-          {/* Additional Personal Details */}
+          {/* dob, age, gender */}
           <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
@@ -351,6 +377,7 @@ const BasicDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder="Pick Date Of Birth"
                         />
                       )}
                     />
@@ -367,12 +394,19 @@ const BasicDetailsForm = () => {
                 <FormItem className="w-full">
                   <FormControl>
                     <Input
-                      type="number"
-                      placeholder="Enter age"
                       {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      type="number"
+                      placeholder={`Age ${calculatedAge ? `(Calculated: ${calculatedAge})` : ''}`}
+                      value={field.value ?? calculatedAge ?? ''}
+                      onChange={(e) => {
+                        const value =
+                          e.target.value === ''
+                            ? undefined
+                            : Number(e.target.value);
+                        field.onChange(value);
+                        setCalculatedAge(value);
+                      }}
                       className="rounded-lg h-12"
-                      aria-required="true"
                     />
                   </FormControl>
                   <FormMessage className="text-sm text-red-600" />
@@ -478,8 +512,8 @@ const BasicDetailsForm = () => {
                     </FormControl>
                     <SelectContent>
                       {bloodGroups.map((group) => (
-                        <SelectItem key={group} value={group}>
-                          {group}
+                        <SelectItem key={group.label} value={group.value}>
+                          {group.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -589,7 +623,7 @@ const BasicDetailsForm = () => {
           </div>
 
           {/* profile url,select role ,isactive,showactivity */}
-          <div className="flex flex-col gap-5 md:flex-row">
+          <div className="flex flex-col gap-5 md:flex-row ">
             <MultiSelect
               options={roles.map((role) => ({
                 value: role.roleId.toString(),
@@ -609,49 +643,46 @@ const BasicDetailsForm = () => {
               animation={2}
               maxCount={5}
             />
-
-            <div className="flex  gap-5 w-full items-center">
-              <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
-                <FormField
-                  control={form.control}
-                  name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between w-full gap-5">
-                      Is Active
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          aria-label="Toggle user active status"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
-                <FormField
-                  control={form.control}
-                  name="showActivity"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center justify-between w-full gap-5">
-                      Show Activity
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          aria-label="Toggle user activity visibility"
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
+            <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between w-full gap-5">
+                    Is Active
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-label="Toggle user active status"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
+              <FormField
+                control={form.control}
+                name="showActivity"
+                render={({ field }) => (
+                  <FormItem className="flex items-center justify-between w-full gap-5">
+                    Show Activity
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-label="Toggle user activity visibility"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
+
           <div className="flex items-center justify-center gap-5 md:flex-row">
-            <FormItem className="w-[50%]">
+            <FormItem className="sm:w-[50%]">
               <Card
                 className={`border p-4 ${profilePreview ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
               >
@@ -720,16 +751,14 @@ const BasicDetailsForm = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-5 justify-end ">
+        <div className="flex items-center gap-5 sm:justify-end ">
           <Button
-            type="submit"
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
             size="lg"
             disabled={isLoading}
+            onClick={onNext}
           >
-            {isLoading ? (
-              <Loader2 className="animate-spin h-5 w-5" />
-            ) : currentSubStep < 4 ? (
+            { currentSubStep < 4 ? (
               'Next'
             ) : (
               'Proceed to Professional Details'
@@ -742,6 +771,17 @@ const BasicDetailsForm = () => {
             onClick={onBack}
           >
             {currentSubStep > 0 ? 'Back' : 'Cancel'}
+          </Button>
+          <Button
+            type="submit"
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
+            size="lg"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin h-5 w-5" />
+            ) : (
+              'Add Basic Details'
+            )}
           </Button>
         </div>
       </form>

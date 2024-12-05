@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, getMonth, getYear, setMonth, setYear } from "date-fns"
+import { format, getMonth, getYear, setMonth, setYear, isWithinInterval, subYears, addYears } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -18,49 +18,61 @@ interface DatePickerProps {
   startYear?: number;
   endYear?: number;
   onSelect?: (date: Date | undefined) => void;
+  placeholder?: string;
+  defaultValue?: Date;
+  minDate?: Date;
+  maxDate?: Date;
 }
+
 export function DatePicker({
   startYear = getYear(new Date()) - 100,
   endYear = getYear(new Date()) + 100,
   onSelect,
+  placeholder = "Pick a date",
+  defaultValue,
+  minDate = subYears(new Date(), 150), // 150 years in the past
+  maxDate = addYears(new Date(), 100)  // 100 years in the future
 }: Readonly<DatePickerProps>) {
-
-  const [date, setDate] = React.useState<Date>(new Date());
+  const [date, setDate] = React.useState<Date | undefined>(defaultValue);
 
   const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
-  const years = Array.from(
-    { length: endYear - startYear + 1 },
-    (_, i) => startYear + i
+
+  const years = React.useMemo(() => 
+    Array.from(
+      { length: endYear - startYear + 1 },
+      (_, i) => startYear + i
+    ),
+    [startYear, endYear]
   );
 
   const handleMonthChange = (month: string) => {
-    const newDate = setMonth(date, months.indexOf(month));
-    setDate(newDate);
+    if (date) {
+      const newDate = setMonth(date, months.indexOf(month));
+      setDate(newDate);
+    }
   }
 
   const handleYearChange = (year: string) => {
-    const newDate = setYear(date, parseInt(year));
-    setDate(newDate)
+    if (date) {
+      const newDate = setYear(date, parseInt(year));
+      setDate(newDate);
+    }
   }
 
-  const handleSelect = (selectedData: Date | undefined) => {
-    if (selectedData) {
-      setDate(selectedData)
-      onSelect?.(selectedData) 
+  const handleSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      // Validate date is within allowed range
+      if (!isWithinInterval(selectedDate, { start: minDate, end: maxDate })) {
+        console.warn('Selected date is outside allowed range');
+        return;
+      }
     }
+    
+    setDate(selectedDate);
+    onSelect?.(selectedDate);
   }
 
   return (
@@ -69,11 +81,11 @@ export function DatePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "rounded-lg h-12 justify-between flex text-left font-normal",
+            "rounded-lg h-12 w-full justify-between flex text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {date ? format(date, "PPP") : <span>{placeholder}</span>}
           <CalendarIcon className="mr-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
@@ -81,7 +93,7 @@ export function DatePicker({
         <div className="flex justify-between p-2">
           <Select
             onValueChange={handleMonthChange}
-            value={months[getMonth(date)]}
+            value={date ? months[getMonth(date)] : ""}
           >
             <SelectTrigger className="w-[110px]">
               <SelectValue placeholder="Month" />
@@ -94,7 +106,7 @@ export function DatePicker({
           </Select>
           <Select
             onValueChange={handleYearChange}
-            value={getYear(date).toString()}
+            value={date ? getYear(date).toString() : ""}
           >
             <SelectTrigger className="w-[110px]">
               <SelectValue placeholder="Year" />
@@ -106,7 +118,7 @@ export function DatePicker({
             </SelectContent>
           </Select>
         </div>
-
+        
         <Calendar
           mode="single"
           selected={date}
@@ -114,6 +126,8 @@ export function DatePicker({
           initialFocus
           month={date}
           onMonthChange={setDate}
+          fromDate={minDate}
+          toDate={maxDate}
         />
       </PopoverContent>
     </Popover>

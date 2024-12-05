@@ -27,6 +27,7 @@ import {
 import { emergencyContactDetailsSchema } from '@/lib/validations';
 import { useMultiStepForm } from '@/hooks/use-multistep-form';
 import { EmergencyContactDetailsFormData } from '@/types/form';
+import toast from 'react-hot-toast';
 
 const EmergencyContactDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +71,7 @@ const EmergencyContactDetailsForm = () => {
       updateFormData({
         emergencyContactDetails: updatedEntries,
       });
+      toast.success(" Emergency Contact Details added Successfully");
 
       // Reset form to default values after adding
       form.reset();
@@ -227,9 +229,8 @@ const EmergencyContactDetailsForm = () => {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
-          
           <Button
-            type="submit"
+          onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}
@@ -253,7 +254,7 @@ const EmergencyContactDetailsForm = () => {
             {isLoading ? (
               <Loader2 className="animate-spin h-5 w-5" />
             ) : (
-              'Add Emergency Contact'
+              'Add Contact'
             )}
           </Button>
         </div>

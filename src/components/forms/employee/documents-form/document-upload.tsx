@@ -12,39 +12,43 @@ import { documentUrlsSchema } from '@/lib/validations';
 import { createEmployee } from '@/actions/employee.action';
 import { useRouter } from 'next/navigation';
 
-// Import context
-
 // Document types configuration
 const documentTypeConfigs = [
   {
     type: 'DegreeCertificatesMarksheets',
     title: 'Degree Certificates & Marksheets',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
   {
     type: 'BirthProof', 
     title: 'Birth Proof',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
   {
     type: 'ExperienceCertificate',
     title: 'Experience Certificate',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
   {
     type: 'RelievingLetter',
     title: 'Relieving Letter',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
   {
     type: 'AadharPhotoCopy',
     title: 'Aadhar Photo Copy',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
   {
     type: 'PanPhotoCopy',
     title: 'PAN Photo Copy',
     accept: '.pdf,.jpg,.jpeg',
+    required: true
   },
 ];
 
@@ -63,7 +67,7 @@ export default function DocumentUploadForm() {
     formData.documentUpload || [],
   );
   const [isLoading, setIsLoading] = useState(false);
-  const router=useRouter();
+  const router = useRouter();
 
   // File upload handler
   const handleFileUpload = async (
@@ -121,22 +125,33 @@ export default function DocumentUploadForm() {
   // Proceed to next step
   const handleProceed = async () => {
     // Validate all required documents are uploaded
-    const requiredDocumentTypes = documentTypeConfigs.map((doc) => doc.type);
+    const requiredDocumentTypes = documentTypeConfigs
+      .filter(doc => doc.required)
+      .map((doc) => doc.type);
+    
     const uploadedTypes = uploadedDocuments.map((doc) => doc.documentType);
 
     const missingDocuments = requiredDocumentTypes.filter(
       (type) => !uploadedTypes.includes(type),
     );
 
+    // If there are missing documents, show toast with specific details
     if (missingDocuments.length > 0) {
+      const missingDocumentTitles = missingDocuments.map(
+        type => documentTypeConfigs.find(doc => doc.type === type)?.title || type
+      );
+      
+      toast.error(
+        `Please upload the following required documents: \n${missingDocumentTitles.join(', ')}`,
+        { duration: 4000 }
+      );
       return;
     }
 
-    console.log('formData is', formData);
-
+    // Proceed with employee creation if all documents are uploaded
     const employeeFinalData: EmployeeFormData = {
       personalDetails: {
-        basicDetails: formData.basicDetails ,
+        basicDetails: formData.basicDetails,
         addressDetails: formData.addressDetails,
         educationalDetails: formData.educationalDetails,
         familyDetails: formData.familyDetails,
@@ -149,29 +164,28 @@ export default function DocumentUploadForm() {
       documentUrls: formData.documentUpload,
     };
 
-    const {success,message,error} = await createEmployee(employeeFinalData);
+    const {success, message, error} = await createEmployee(employeeFinalData);
     if(success && message){
       toast.success(message);
-      router.push('/dashboard/employees')
-    }else{
-      
-      error && toast.error(error)
+      router.push('/dashboard/employees');
+    } else {
+      error && toast.error(error);
     }
   };
 
   const onBack = () => {
-    // Logic for navigating backwards through substeps and main steps
-
     setActiveStep('Professional Details');
     setCurrentSubStep(1);
   };
 
   return (
     <div className="space-y-6 ">
-      <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 h-[500px]  sm:h-fit scrollbar-none overflow-x-auto">
-        {documentTypeConfigs.map(({ type, title, accept }) => (
+      <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 h-[500px] sm:h-fit scrollbar-none overflow-x-auto">
+        {documentTypeConfigs.map(({ type, title, accept, required }) => (
           <div key={type} className="space-y-2">
-            <h2 className="text-sm font-medium text-gray-700">{title}</h2>
+            <h2 className="text-sm font-medium text-gray-700">
+              {title} {required && <span className="text-red-500">*</span>}
+            </h2>
             <Card
               className={`border ${
                 uploadedDocuments.some((doc) => doc.documentType === type)
@@ -227,7 +241,7 @@ export default function DocumentUploadForm() {
       <div className="flex justify-end space-x-4 mt-6">
         <Button
           type="submit"
-          className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
+          className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
           size="lg"
           onClick={handleProceed}
           disabled={isLoading}

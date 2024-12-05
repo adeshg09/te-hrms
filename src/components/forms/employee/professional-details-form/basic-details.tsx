@@ -61,8 +61,8 @@ const ProfBasicDetailsForm = () => {
     resolver: zodResolver(profBasicDetailsSchema),
     defaultValues: {
       designation: formData.profBasicDetails?.designation || '',
-      employmentType: formData.profBasicDetails?.employmentType || 'FullTime',
-      workingType: formData.profBasicDetails?.workingType || 'Hybrid',
+      employmentType: formData.profBasicDetails?.employmentType || undefined,
+      workingType: formData.profBasicDetails?.workingType || undefined,
       dateOfJoin: formData.profBasicDetails?.dateOfJoin || undefined,
       signatureUrl: formData.profBasicDetails?.signatureUrl || '',
     },
@@ -133,19 +133,24 @@ const ProfBasicDetailsForm = () => {
       updateFormData({
         profBasicDetails: values,
       });
+      toast.success(" Professional Basic Details submitted Successfully");
 
-      if (currentSubStep < 1) {
-        setCurrentSubStep(currentSubStep + 1);
-      } else {
-        setActiveStep('Documents');
-        setCurrentSubStep(0);
-      }
+      
     } catch (error) {
       console.error('Submission error:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const onNext=()=>{
+    if (currentSubStep < 1) {
+      setCurrentSubStep(currentSubStep + 1);
+    } else {
+      setActiveStep('Documents');
+      setCurrentSubStep(0);
+    }
+  }
 
   const onBack = async () => {
     if (currentSubStep > 0) {
@@ -267,6 +272,7 @@ const ProfBasicDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
+                          placeholder='Pick date of join'
                         />
                       )}
                     />
@@ -349,17 +355,15 @@ const ProfBasicDetailsForm = () => {
         {/* Submit Button */}
         <div className="flex items-center gap-5 justify-end ">
           <Button
-            type="submit"
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
             size="lg"
             disabled={isLoading}
+            onClick={onNext}
           >
-            {isLoading ? (
-              <Loader2 className="animate-spin h-5 w-5" />
-            ) : currentSubStep < 1 ? (
+            { currentSubStep < 4 ? (
               'Next'
             ) : (
-              'Proceed to Documents'
+              'Proceed to Professional Details'
             )}
           </Button>
           <Button
@@ -368,7 +372,18 @@ const ProfBasicDetailsForm = () => {
             size="lg"
             onClick={onBack}
           >
-            {currentSubStep > 0 ? 'Back' : 'Back to Personal Details '}
+            Back to Personal Details
+          </Button>
+          <Button
+            type="submit"
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
+            size="lg"
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin h-5 w-5" />
+            ) : (
+              'Add Basic Details'
+            )}
           </Button>
         </div>
       </form>
