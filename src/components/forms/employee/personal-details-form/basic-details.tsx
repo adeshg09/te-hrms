@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
+import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import { FileUp, Loader2, Trash2 } from 'lucide-react';
 
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -24,63 +25,72 @@ import {
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { MultiSelect } from '@/components/multi-select';
-
-import { Loader2 } from 'lucide-react';
+import { DatePicker } from '@/components/ui/custom-datepicker';
 
 import { getAllRoles } from '@/actions/role.action';
 import { basicDetailsSchema } from '@/lib/validations';
 import { Role } from '@/types';
 import { bloodGroups, marritalStatus } from '@/constants';
-import { DatePicker } from '@/components/ui/custom-datepicker';
-import { basicDetailsFormData } from '@/types/form';
-import { useRouter } from 'next/navigation';
 import { useMultiStepForm } from '@/hooks/use-multistep-form';
+import { BasicDetailsFormData } from '@/types/form';
+import toast from 'react-hot-toast';
+import { Card } from '@/components/ui/card';
+
+// Helper function for simulated profile upload
+async function uploadProfileToCloudStorage(file: File): Promise<string> {
+  // In production, replace with actual cloud storage upload logic
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(`https://example.com/profiles/${file.name}`);
+    }, 1000);
+  });
+}
 
 const BasicDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<number[]>([]);
 
-  const router=useRouter();
-  const { 
-    activeStep, 
-    currentSubStep, 
-    setCurrentSubStep, 
-    updateFormData ,
+  const [profileFile, setProfileFile] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>();
+
+  const router = useRouter();
+  const {
+    activeStep,
+    setActiveStep,
+    currentSubStep,
+    setCurrentSubStep,
+    updateFormData,
     formData,
   } = useMultiStepForm();
 
-
-  const form = useForm<basicDetailsFormData>({
+  const form = useForm<BasicDetailsFormData>({
     resolver: zodResolver(basicDetailsSchema),
     defaultValues: {
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      mobileNo: '',
-      emailId: '',
-      password: '',
-      profileUrl: '',
-      roles: [],
-      isActive: true,
-      showActivity: true,
-      dateOfBirth: undefined,
-      age: 18,
-      gender: 'Male',
-      maritalStatus: 'Single',
-      bloodGroup: 'APlus',
-      birthCountry: '',
-      birthState: '',
-      birthLocation: '',
-      panNo: '',
-      caste: '',
-      religion: '',
-      domicile: '',
-    }
+      firstName: formData.basicDetails?.firstName || '',
+      middleName: formData.basicDetails?.middleName || '',
+      lastName: formData.basicDetails?.lastName || '',
+      mobileNo: formData.basicDetails?.mobileNo || '',
+      emailId: formData.basicDetails?.emailId || '',
+      password: formData.basicDetails?.password || '',
+      profileUrl: formData.basicDetails?.profileUrl || '',
+      roles: formData.basicDetails?.roles || [],
+      isActive: formData.basicDetails?.isActive ?? true,
+      showActivity: formData.basicDetails?.showActivity ?? true,
+      dateOfBirth: formData.basicDetails?.dateOfBirth || undefined,
+      age: formData.basicDetails?.age || 18,
+      gender: formData.basicDetails?.gender || 'Male',
+      maritalStatus: formData.basicDetails?.maritalStatus || 'Single',
+      bloodGroup: formData.basicDetails?.bloodGroup || 'APlus',
+      birthCountry: formData.basicDetails?.birthCountry || '',
+      birthState: formData.basicDetails?.birthState || '',
+      birthLocation: formData.basicDetails?.birthLocation || '',
+      panNo: formData.basicDetails?.panNo || '',
+      caste: formData.basicDetails?.caste || '',
+      religion: formData.basicDetails?.religion || '',
+      domicile: formData.basicDetails?.domicile || '',
+    },
   });
-
-  console.log(form.formState.errors);
-  
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -94,6 +104,12 @@ const BasicDetailsForm = () => {
 
         if (roles && roles.length > 0) {
           setRoles(roles);
+          // Pre-select existing roles if in form data
+          if (formData.basicDetails?.roles) {
+            setSelectedRoles(
+              formData.basicDetails.roles.map((role) => role.roleId),
+            );
+          }
         }
       } catch (catchError) {
         console.error('Unexpected error in fetchRoles:', catchError);
@@ -101,38 +117,102 @@ const BasicDetailsForm = () => {
     };
 
     fetchRoles();
-  }, []);
+  }, [formData.basicDetails?.roles]);
 
-  const onSubmit = async (values: basicDetailsFormData) => {
+  const handleProfileUpload = async (file: File) => {
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/svg+xml'].includes(file.type)) {
+      toast.error('Invalid file type. Please upload JPEG, PNG, or SVG.');
+      return;
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size should not exceed 5MB');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const profileUrl = await uploadProfileToCloudStorage(file);
+
+      // Update form values
+      form.setValue('profileUrl', profileUrl);
+
+      // Store file and preview
+      setProfileFile(file);
+      setProfilePreview(URL.createObjectURL(file));
+
+      toast.success('Profile picture uploaded successfully');
+    } catch (error) {
+      toast.error('Failed to upload profile picture');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Remove profile picture handler
+  const handleRemoveProfile = () => {
+    setProfileFile(null);
+    setProfilePreview(null);
+    form.setValue('profileUrl', '');
+  };
+
+  const onSubmit = async (values: BasicDetailsFormData) => {
     setIsLoading(true);
     try {
-      console.log('Form Values:', values);
-      updateFormData(values);
+      // Update form data in context
+      updateFormData({
+        basicDetails: values,
+      });
 
+      // Navigation logic for substeps and main steps
       if (currentSubStep < 4) {
+        // Move to next substep within Personal Details
         setCurrentSubStep(currentSubStep + 1);
       } else {
-        // If this is the last substep, move to next main step
+        // When all substeps are complete, move to next main step
         // In this case, move to 'Professional Details'
-        // Typically you'd dispatch an action to change main step
+        setActiveStep('Professional Details');
+        // Reset substep to 0 when moving to a new main step
+        setCurrentSubStep(0);
       }
-
-      // Your submission logic here, e.g.:
-      // const response = await submitUserDetails(values);
     } catch (error) {
       console.error('Submission error:', error);
+      // Optionally, handle error states
+      // You might want to show an error toast or message
     } finally {
       setIsLoading(false);
     }
   };
 
   const onBack = () => {
+    // Logic for navigating backwards through substeps and main steps
     if (currentSubStep > 0) {
-      // Go back to previous substep
+      // If not at the first substep, go back to previous substep
       setCurrentSubStep(currentSubStep - 1);
     } else {
-      // If first substep, go back to employee dashboard
-      router.push(`/dashboard/employees`);
+      // If at the first substep, determine how to navigate back
+      switch (activeStep) {
+        case 'Personal Details':
+          // If already at the first step, go back to employees dashboard
+          router.push('/dashboard/employees');
+          break;
+        case 'Professional Details':
+          // Move back to the last substep of 'Personal Details'
+          setActiveStep('Personal Details');
+          setCurrentSubStep(4); // Last substep of Personal Details
+          break;
+        case 'Documents':
+          // Move back to 'Professional Details'
+          setActiveStep('Professional Details');
+          setCurrentSubStep(1); // Last substep of Professional Details
+          break;
+        default:
+          // Fallback to dashboard if something unexpected happens
+          router.push('/dashboard/employees');
+      }
     }
   };
 
@@ -508,27 +588,8 @@ const BasicDetailsForm = () => {
             />
           </div>
 
-
           {/* profile url,select role ,isactive,showactivity */}
           <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="profileUrl"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      type="url"
-                      placeholder="Enter profile URL"
-                      {...field}
-                      className="rounded-lg h-12"
-                      aria-required="true"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
             <MultiSelect
               options={roles.map((role) => ({
                 value: role.roleId.toString(),
@@ -549,10 +610,8 @@ const BasicDetailsForm = () => {
               maxCount={5}
             />
 
-            <div className="flex  gap-5 w-full items-center justify-between">
-             
-
-              <div className="flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
+            <div className="flex  gap-5 w-full items-center">
+              <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
                 <FormField
                   control={form.control}
                   name="isActive"
@@ -571,7 +630,7 @@ const BasicDetailsForm = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
+              <div className="w-full flex items-center justify-between rounded-lg h-12 border border-gray-200 px-4">
                 <FormField
                   control={form.control}
                   name="showActivity"
@@ -591,6 +650,74 @@ const BasicDetailsForm = () => {
               </div>
             </div>
           </div>
+          <div className="flex items-center justify-center gap-5 md:flex-row">
+            <FormItem className="w-[50%]">
+              <Card
+                className={`border p-4 ${profilePreview ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}
+              >
+                <div className="flex flex-col items-center space-y-4">
+                  {!profilePreview && (
+                    <div className="rounded-full bg-secondary-default p-3 flex items-center justify-center gap-3">
+                      <FileUp className="text-white" />
+                      <FormLabel className="text-white">
+                        Upload Profile Picture
+                      </FormLabel>
+                    </div>
+                  )}
+                  <div className="text-center">
+                    {profilePreview ? (
+                      <div className="flex items-center justify-between gap-10">
+                        <img
+                          src={profilePreview}
+                          alt="Profile Preview"
+                          className="max-w-[200px] max-h-[200px] object-cover rounded-lg"
+                        />
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleRemoveProfile}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm text-gray-600">
+                          Drag & Drop or{' '}
+                          <input
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.svg"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleProfileUpload(file);
+                              }
+                            }}
+                            className="hidden"
+                            id="profile-upload"
+                          />
+                          <label
+                            htmlFor="profile-upload"
+                            className="text-secondary-default hover:underline cursor-pointer"
+                          >
+                            choose file
+                          </label>{' '}
+                          to upload
+                        </p>
+                        <p className="text-xs text-gray-400 mt-2">
+                          Supported formats: JPEG, PNG, SVG (Max 5MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Card>
+              <FormMessage />
+            </FormItem>
+          </div>
         </div>
 
         <div className="flex items-center gap-5 justify-end ">
@@ -602,10 +729,10 @@ const BasicDetailsForm = () => {
           >
             {isLoading ? (
               <Loader2 className="animate-spin h-5 w-5" />
+            ) : currentSubStep < 4 ? (
+              'Next'
             ) : (
-              currentSubStep < 4 
-                ? 'Next' 
-                : 'Proceed to Professional Details'
+              'Proceed to Professional Details'
             )}
           </Button>
           <Button
@@ -614,11 +741,9 @@ const BasicDetailsForm = () => {
             size="lg"
             onClick={onBack}
           >
-            {currentSubStep > 0 ? 'Previous Substep' : 'Back'}
+            {currentSubStep > 0 ? 'Back' : 'Cancel'}
           </Button>
         </div>
-        
-
       </form>
     </Form>
   );

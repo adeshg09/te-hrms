@@ -1,10 +1,11 @@
 'use client';
 
-import { educationalDetailsSchema } from '@/lib/validations';
-import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2, Trash2 } from 'lucide-react';
+
 import {
   Form,
   FormControl,
@@ -30,352 +31,418 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { Loader2, Trash2 } from 'lucide-react';
+import { DatePicker } from '@/components/ui/custom-datepicker';
+import { educationalDetailsSchema } from '@/lib/validations';
+import { useMultiStepForm } from '@/hooks/use-multistep-form';
+import { EducationDetailsFormData } from '@/types/form';
 
 import { educationCourse, educationStatus, studyMode } from '@/constants';
-import { DatePicker } from '@/components/ui/custom-datepicker';
-import { educationDetailsFormData } from '@/types/form';
 import { format } from 'date-fns';
 
 const EducationalDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [educationDetailsEntries, setEducationDetailsEntries] = useState<
-    educationDetailsFormData[]
-  >([]);
+  const router = useRouter();
 
-  const form = useForm<educationDetailsFormData>({
+  const {
+    activeStep,
+    setActiveStep,
+    currentSubStep,
+    setCurrentSubStep,
+    updateFormData,
+    formData,
+  } = useMultiStepForm();
+
+  // Get existing educational details from form data or initialize empty array
+  const existingEducationDetails = formData.educationalDetails || [];
+  const [educationDetailsEntries, setEducationDetailsEntries] = useState<
+    EducationDetailsFormData[]
+  >(existingEducationDetails);
+
+  const form = useForm<EducationDetailsFormData>({
     resolver: zodResolver(educationalDetailsSchema),
     defaultValues: {
-      course: 'Std 10th',
-      degreeSpecialization: '',
-      instituteUniversityName: '',
-      status: 'Completed',
-      studyMode: 'Full Time',
-      fromDate: undefined,
-      toDate: undefined,
-      percentage: 100,
+      course: formData.educationalDetails?.[0]?.course || 'Std10th',
+      degreeSpecialization:
+        formData.educationalDetails?.[0]?.degreeSpecialization || '',
+      instituteUniversityName:
+        formData.educationalDetails?.[0]?.instituteUniversityName || '',
+      status: formData.educationalDetails?.[0]?.status || 'Completed',
+      studyMode: formData.educationalDetails?.[0]?.studyMode || 'FullTime',
+      fromDate: formData.educationalDetails?.[0]?.fromDate,
+      toDate: formData.educationalDetails?.[0]?.toDate,
+      percentage: formData.educationalDetails?.[0]?.percentage || 100,
     },
   });
 
-  const addEntry = () => {};
+  const addEntry = () => {
+    form.handleSubmit((values) => {
+      const updatedEntries = [...educationDetailsEntries, values];
 
-  const onSubmit = async (values: educationDetailsFormData) => {
-    setIsLoading(true);
-    try {
-      // Add new entry to the list of education details
-      setEducationDetailsEntries((prevEntries) => {
-        // Ensure no duplicate entries
-        const isDuplicate = prevEntries.some(
-          (entry) =>
-            entry.course === values.course &&
-            entry.instituteUniversityName === values.instituteUniversityName &&
-            entry.fromDate === values.fromDate,
-        );
+      // Update local state
+      setEducationDetailsEntries(updatedEntries);
 
-        if (isDuplicate) {
-          // Optionally, you could show a toast or alert here
-          return prevEntries;
-        }
-
-        return [...prevEntries, values];
+      // Also update form data in context
+      updateFormData({
+        educationalDetails: updatedEntries,
       });
 
-      // Reset the form after submission
+      // Reset form to default values after adding
       form.reset();
-    } catch (e) {
-      console.error(e);
+    })();
+  };
+
+  const onSubmit = async () => {
+    setIsLoading(true);
+    try {
+      // Update form data in context
+      updateFormData({
+        educationalDetails: educationDetailsEntries,
+      });
+
+      // Navigation logic for substeps and main steps
+      if (currentSubStep < 4) {
+        // Move to next substep within Personal Details
+        setCurrentSubStep(currentSubStep + 1);
+      } else {
+        // When all substeps are complete, move to next main step
+        setActiveStep('Professional Details');
+        // Reset substep to 0 when moving to a new main step
+        setCurrentSubStep(0);
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const onBack = () => {
+    // Logic for navigating backwards through substeps and main steps
+    if (currentSubStep > 0) {
+      // If not at the first substep, go back to previous substep
+      setCurrentSubStep(currentSubStep - 1);
+    } else {
+      // If at the first substep, determine how to navigate back
+      switch (activeStep) {
+        case 'Personal Details':
+          // If already at the first step, go back to employees dashboard
+          router.push('/dashboard/employees');
+          break;
+        case 'Professional Details':
+          // Move back to the last substep of 'Personal Details'
+          setActiveStep('Personal Details');
+          setCurrentSubStep(4); // Last substep of Personal Details
+          break;
+        case 'Documents':
+          // Move back to 'Professional Details'
+          setActiveStep('Professional Details');
+          setCurrentSubStep(1); // Last substep of Professional Details
+          break;
+        default:
+          // Fallback to dashboard if something unexpected happens
+          router.push('/dashboard/employees');
+      }
+    }
+  };
+
   const removeEducationEntry = (indexToRemove: number) => {
-    setEducationDetailsEntries((prevEntries) =>
-      prevEntries.filter((_, index) => index !== indexToRemove),
+    const updatedEntries = educationDetailsEntries.filter(
+      (_, index) => index !== indexToRemove,
     );
+
+    // Update local state
+    setEducationDetailsEntries(updatedEntries);
+
+    // Update form data in context
+    updateFormData({
+      educationalDetails: updatedEntries,
+    });
   };
 
   return (
-    <div className="space-y-6">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-5 w-full h-full rounded-lg "
-        >
-          <div className="flex flex-col gap-5 overflow-y-scroll h-[250px] scrollbar-none ">
-            <div className="flex flex-col gap-5 md:flex-row">
-              <FormField
-                control={form.control}
-                name="course"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                          <SelectValue placeholder="Select course" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {educationCourse.map((course) => (
-                          <SelectItem key={course} value={course}>
-                            {course}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="degreeSpecialization"
-                render={({ field }) => (
-                  <FormItem className="w-full">
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-5 w-full h-full rounded-lg"
+      >
+        <div className="flex flex-col gap-5 overflow-y-scroll h-[290px] scrollbar-none">
+          {/* Course and Specialization */}
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="course"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <Input
-                        placeholder="Enter specialization"
-                        {...field}
-                        className="rounded-lg h-12"
-                      />
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select course" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex flex-col gap-5 md:flex-row">
-              <FormField
-                control={form.control}
-                name="instituteUniversityName"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Input
-                        placeholder="Enter institute/university name"
-                        {...field}
-                        className="rounded-lg h-12"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="percentage"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter percentage"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        className="rounded-lg h-12"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex flex-col gap-5 md:flex-row">
-              <FormField
-                control={form.control}
-                name="fromDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col w-full">
-                    <FormControl>
-                      <Controller
-                        name="fromDate"
-                        control={form.control}
-                        render={({ field: { onChange, value } }) => (
-                          <DatePicker
-                            startYear={1924}
-                            onSelect={(selectedDate) => {
-                              onChange(selectedDate);
-                            }}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="toDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col w-full">
-                    <FormControl>
-                      <Controller
-                        name="toDate"
-                        control={form.control}
-                        render={({ field: { onChange, value } }) => (
-                          <DatePicker
-                            startYear={1924}
-                            onSelect={(selectedDate) => {
-                              onChange(selectedDate);
-                            }}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex flex-col gap-5 md:flex-row">
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {educationStatus.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="studyMode"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                          <SelectValue placeholder="Select study mode" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {studyMode.map((mode) => (
-                          <SelectItem key={mode} value={mode}>
-                            {mode}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-5 justify-end">
-            <Button
-              type="submit"
-              className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
-              size="lg"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader2 className="animate-spin h-5 w-5" />
-              ) : (
-                'Add Education'
+                    <SelectContent>
+                      {educationCourse.map((course) => (
+                        <SelectItem key={course} value={course}>
+                          {course}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
               )}
-            </Button>
-            <Button
-              type="button"
-              className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
-              size="lg"
-              onClick={() => {}}
-            >
-              Next
-            </Button>
-            <Button
-              type="button"
-              className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
-              size="lg"
-              onClick={() => {}}
-            >
-              Back
-            </Button>
+            />
+            <FormField
+              control={form.control}
+              name="degreeSpecialization"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Enter specialization"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <div className="flex items-center gap-5 justify-end h-[100px] overflow-y-scroll ">
-            {educationDetailsEntries.length > 0 && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Specialization</TableHead>
-                    <TableHead>Institute</TableHead>
-                    <TableHead>From Date</TableHead>
-                    <TableHead>To Date</TableHead>
-                    <TableHead>Percentage</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Study Mode</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {educationDetailsEntries.map((entry, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{entry.course}</TableCell>
-                      <TableCell>{entry.degreeSpecialization}</TableCell>
-                      <TableCell>{entry.instituteUniversityName}</TableCell>
-                      <TableCell>
-                        {entry.fromDate
-                          ? format(new Date(entry.fromDate), 'MMM yyyy')
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        {entry.toDate
-                          ? format(new Date(entry.toDate), 'MMM yyyy')
-                          : 'N/A'}
-                      </TableCell>
-                      <TableCell>{entry.percentage}%</TableCell>
-                      <TableCell>{entry.status}</TableCell>
-                      <TableCell>{entry.studyMode}</TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => removeEducationEntry(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          {/* Institute and Percentage */}
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="instituteUniversityName"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      placeholder="Enter institute/university name"
+                      {...field}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="percentage"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter percentage"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      className="rounded-lg h-12"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* From and To Dates */}
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="fromDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-full">
+                  <FormControl>
+                    <Controller
+                      name="fromDate"
+                      control={form.control}
+                      render={({ field: { onChange, value } }) => (
+                        <DatePicker
+                          startYear={1924}
+                          onSelect={(selectedDate) => {
+                            onChange(selectedDate);
+                          }}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="toDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col w-full">
+                  <FormControl>
+                    <Controller
+                      name="toDate"
+                      control={form.control}
+                      render={({ field: { onChange, value } }) => (
+                        <DatePicker
+                          startYear={1924}
+                          onSelect={(selectedDate) => {
+                            onChange(selectedDate);
+                          }}
+                        />
+                      )}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          {/* Status and Study Mode */}
+          <div className="flex flex-col gap-5 md:flex-row">
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {educationStatus.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="studyMode"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select study mode" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {studyMode.map((mode) => (
+                        <SelectItem key={mode} value={mode}>
+                          {mode}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-5 justify-end">
+          <Button
+            type="submit"
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
+            size="lg"
+            disabled={isLoading}
+          >
+            {currentSubStep < 4 ? 'Next' : 'Proceed to Professional Details'}
+          </Button>
+          <Button
+            type="button"
+            className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
+            size="lg"
+            onClick={onBack}
+          >
+            Back
+          </Button>
+          <Button
+            type="button"
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
+            size="lg"
+            onClick={addEntry}
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin h-5 w-5" />
+            ) : (
+              'Add Education'
             )}
-          </div>
-        </form>
-      </Form>
+          </Button>
+        </div>
 
-      
-    </div>
+        {/* Education Entries Table */}
+        {educationDetailsEntries.length > 0 && (
+          <div className="flex items-center gap-5 justify-end h-[120px] overflow-y-scroll">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Course</TableHead>
+                  <TableHead>Specialization</TableHead>
+                  <TableHead>Institute</TableHead>
+                  <TableHead>From Date</TableHead>
+                  <TableHead>To Date</TableHead>
+                  <TableHead>Percentage</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Study Mode</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              
+              <TableBody>
+                {educationDetailsEntries.map((entry, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{entry.course}</TableCell>
+                    <TableCell>{entry.degreeSpecialization}</TableCell>
+                    <TableCell>{entry.instituteUniversityName}</TableCell>
+                    <TableCell>
+                      {entry.fromDate
+                        ? format(new Date(entry.fromDate), 'MMM yyyy')
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {entry.toDate
+                        ? format(new Date(entry.toDate), 'MMM yyyy')
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>{entry.percentage}%</TableCell>
+                    <TableCell>{entry.status}</TableCell>
+                    <TableCell>{entry.studyMode}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeEducationEntry(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </form>
+    </Form>
   );
 };
 

@@ -1,7 +1,7 @@
 "use server"
 
 import { resetJWTPayload } from './../types/index';
-import { forgotPasswordFormData, LoginFormData, ResetPasswordFormData } from '@/types/form';
+import { ForgotPasswordFormData, LoginFormData, ResetPasswordFormData } from '@/types/form';
 import {
   createSession,
   deleteSession,
@@ -12,7 +12,7 @@ import { db } from '@/lib/db';
 import { SignJWT } from 'jose';
 import { generateResetPasswordMail } from '@/lib/mail';
 import { comparePassword, hashPassword } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+
 
 const secretKey = "qwerty";
 if (!secretKey) {
@@ -66,7 +66,7 @@ export const logout = async () => {
   }
 };
 
-export const forgotPassword = async (data: forgotPasswordFormData) => {
+export const forgotPassword = async (data: ForgotPasswordFormData) => {
   const alg = 'HS256';
   const { emailId } = data;
 
@@ -153,13 +153,7 @@ export const resetPassword = async (token: string, data: ResetPasswordFormData) 
           password: hashedPassword,
         },
       });
-  
-      await db.user.update({
-        where: { userId: user.userId },
-        data: {
-          password: hashedPassword,
-        },
-      });
+
   
       return { success: true };
     } catch (error) {

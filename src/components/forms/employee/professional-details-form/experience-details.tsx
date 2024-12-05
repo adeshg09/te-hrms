@@ -1,18 +1,20 @@
 'use client';
 
-import { experienceDetailsSchema } from '@/lib/validations';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { Loader2, Trash2 } from 'lucide-react';
+
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -20,43 +22,136 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { CalendarIcon, Loader2 } from 'lucide-react';
-import { useState } from 'react';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+import { DatePicker } from '@/components/ui/custom-datepicker';
+import { experienceDetailsSchema } from '@/lib/validations';
+import { useMultiStepForm } from '@/hooks/use-multistep-form';
+import { ExperienceDetailsFormData } from '@/types/form';
+
 import { format } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
+import { employementType } from '@/constants';
 
 const ExperienceDetailsForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof experienceDetailsSchema>>({
+  const {
+    activeStep,
+    setActiveStep,
+    currentSubStep,
+    setCurrentSubStep,
+    updateFormData,
+    formData,
+  } = useMultiStepForm();
+
+  // Get existing experience details from form data or initialize empty array
+  const existingExperienceDetails = formData.experienceDetails || [];
+  const [experienceDetailsEntries, setExperienceDetailsEntries] = useState<
+    ExperienceDetailsFormData[]
+  >(existingExperienceDetails);
+
+  const form = useForm<ExperienceDetailsFormData>({
     resolver: zodResolver(experienceDetailsSchema),
-    defaultValues: {},
+    defaultValues: {
+      empName: formData.experienceDetails?.[0]?.empName || '',
+      empId: formData.experienceDetails?.[0]?.empId || '',
+      jobTitle: formData.experienceDetails?.[0]?.jobTitle || '',
+      startDate: formData.experienceDetails?.[0]?.startDate,
+      endDate: formData.experienceDetails?.[0]?.endDate,
+      country: formData.experienceDetails?.[0]?.country || '',
+      state: formData.experienceDetails?.[0]?.state || '',
+      city: formData.experienceDetails?.[0]?.city || '',
+      employmentType:
+        formData.experienceDetails?.[0]?.employmentType || 'FullTime',
+      supervisorName: formData.experienceDetails?.[0]?.supervisorName || '',
+      supervisorMobNo: formData.experienceDetails?.[0]?.supervisorMobNo || '',
+    },
   });
 
-  const onSubmit = async (values: z.infer<typeof experienceDetailsSchema>) => {
+  const addEntry = () => {
+    form.handleSubmit((values) => {
+      const updatedEntries = [...experienceDetailsEntries, values];
+
+      // Update local state
+      setExperienceDetailsEntries(updatedEntries);
+
+      // Also update form data in context
+      updateFormData({
+        experienceDetails: updatedEntries,
+      });
+
+      // Reset form to default values after adding
+      form.reset();
+    })();
+  };
+
+  const onSubmit = async () => {
     setIsLoading(true);
     try {
-      console.log(values);
+      // Update form data in context
+      updateFormData({
+        experienceDetails: experienceDetailsEntries,
+      });
+
+      // Navigation logic for substeps and main steps
+      if (currentSubStep < 1) {
+        // Move to next substep within Professional Details
+        setCurrentSubStep(currentSubStep + 1);
+      } else {
+        // When all substeps are complete, move to next main step
+        setActiveStep('Documents');
+        // Reset substep to 0 when moving to a new main step
+        setCurrentSubStep(0);
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Submission error:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onBack = () => {
+    // Logic for navigating backwards through substeps and main steps
+    if (currentSubStep > 0) {
+      // If not at the first substep, go back to previous substep
+      setCurrentSubStep(currentSubStep - 1);
+    } else {
+      // If at the first substep, go back to Personal Details
+      setActiveStep('Personal Details');
+      setCurrentSubStep(4); // Last substep of Personal Details
+    }
+  };
+
+  const removeExperienceEntry = (indexToRemove: number) => {
+    const updatedEntries = experienceDetailsEntries.filter(
+      (_, index) => index !== indexToRemove,
+    );
+
+    // Update local state
+    setExperienceDetailsEntries(updatedEntries);
+
+    // Update form data in context
+    updateFormData({
+      experienceDetails: updatedEntries,
+    });
   };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5 w-full h-full rounded-lg "
+        className="flex flex-col gap-5 w-full h-full rounded-lg"
       >
-        <div className="flex flex-col gap-5  overflow-y-scroll md:h-[330px] sm:h-[324px] h-[344px]  scrollbar-none ">
+        <div className="flex flex-col gap-5 overflow-y-scroll h-[290px] scrollbar-none">
+          {/* Employee Name and ID */}
           <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
@@ -65,12 +160,12 @@ const ExperienceDetailsForm = () => {
                 <FormItem className="w-full">
                   <FormControl>
                     <Input
-                      placeholder="Enter your name"
+                      placeholder="Enter employee name"
                       {...field}
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
@@ -81,42 +176,18 @@ const ExperienceDetailsForm = () => {
                 <FormItem className="w-full">
                   <FormControl>
                     <Input
-                      placeholder="Enter employee id"
+                      placeholder="Enter employee ID"
                       {...field}
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
-
-            {/* Employment Type
-          <FormField
-            control={form.control}
-            name="employmentType"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                      <SelectValue placeholder="Select employment type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="FullTime">Full-Time</SelectItem>
-                      <SelectItem value="PartTime">Part-Time</SelectItem>
-                      <SelectItem value="Internship">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           </div>
+
+          {/* Job Title and Employment Type */}
           <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
@@ -130,51 +201,59 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="employmentType"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                        <SelectValue placeholder="Select employment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {employementType.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-sm text-red-600" />
+                </FormItem>
+              )}
+            />
+          </div>
 
+          {/* Start and End Dates */}
+          <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
               name="startDate"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <Popover>
-                    <PopoverTrigger
-                      asChild
-                      className="rounded-lg h-12 bg-white border-grey-200"
-                    >
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={`w-full pl-3 text-left font-normal ${
-                            !field.value && 'text-muted-foreground'
-                          }`}
-                        >
-                          {field.value ? (
-                            format(new Date(field.value), 'PPP')
-                          ) : (
-                            <span>Enter Start Date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date) => field.onChange(date?.toISOString())}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem className="flex flex-col w-full">
+                  <FormControl>
+                    <Controller
+                      name="startDate"
+                      control={form.control}
+                      render={({ field: { onChange, value } }) => (
+                        <DatePicker
+                          startYear={1924}
+                          onSelect={(selectedDate) => {
+                            onChange(selectedDate);
+                          }}
+                        />
+                      )}
+                    />
+                  </FormControl>
                   <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
@@ -183,47 +262,28 @@ const ExperienceDetailsForm = () => {
               control={form.control}
               name="endDate"
               render={({ field }) => (
-                <FormItem className="w-full">
-                  <Popover>
-                    <PopoverTrigger
-                      asChild
-                      className="rounded-lg h-12 bg-white border-grey-200"
-                    >
-                      <FormControl>
-                        <Button
-                          variant={'outline'}
-                          className={`w-full pl-3 text-left font-normal ${
-                            !field.value && 'text-muted-foreground'
-                          }`}
-                        >
-                          {field.value ? (
-                            format(new Date(field.value), 'PPP')
-                          ) : (
-                            <span>Enter Date Of Birth</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date) => field.onChange(date?.toISOString())}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                <FormItem className="flex flex-col w-full">
+                  <FormControl>
+                    <Controller
+                      name="endDate"
+                      control={form.control}
+                      render={({ field: { onChange, value } }) => (
+                        <DatePicker
+                          startYear={1924}
+                          onSelect={(selectedDate) => {
+                            onChange(selectedDate);
+                          }}
+                        />
+                      )}
+                    />
+                  </FormControl>
                   <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
           </div>
+
+          {/* Location */}
           <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
@@ -237,7 +297,7 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
@@ -253,7 +313,7 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
@@ -269,37 +329,14 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="employmentType"
-              render={({ field }) => (
-                <FormItem className="w-full ">
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200 ">
-                        <SelectValue placeholder="Select employment type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Male">Full Time</SelectItem>
-                      <SelectItem value="Female">Part Time</SelectItem>
-                      <SelectItem value="Other">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
+          </div>
 
+          {/* Supervisor Details */}
+          <div className="flex flex-col gap-5 md:flex-row">
             <FormField
               control={form.control}
               name="supervisorName"
@@ -312,13 +349,13 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="city"
+              name="supervisorMobNo"
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormControl>
@@ -328,35 +365,91 @@ const ExperienceDetailsForm = () => {
                       className="rounded-lg h-12"
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-sm text-red-600" />
                 </FormItem>
               )}
             />
           </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="flex items-center gap-5  justify-end">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-5 justify-end">
           <Button
             type="submit"
-            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <Loader2 className="animate-spin h-5 w-5" />
-            ) : (
-              'Submit'
-            )}
+            {currentSubStep < 1 ? 'Next' : 'Proceed to Documents'}
           </Button>
           <Button
             type="button"
             className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
             size="lg"
-            onClick={() => {}}
+            onClick={onBack}
           >
             Back
           </Button>
+          <Button
+            type="button"
+            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
+            size="lg"
+            onClick={addEntry}
+          >
+            {isLoading ? (
+              <Loader2 className="animate-spin h-5 w-5" />
+            ) : (
+              'Add Experience'
+            )}
+          </Button>
+        </div>
+
+        {/* Experience Entries Table */}
+        <div className="flex items-center gap-5 justify-end h-[100px] overflow-y-scroll">
+          {experienceDetailsEntries.length > 0 && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employer Name</TableHead>
+                  <TableHead>Job Title</TableHead>
+                  <TableHead>Employment Type</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {experienceDetailsEntries.map((entry, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{entry.empName}</TableCell>
+                    <TableCell>{entry.jobTitle}</TableCell>
+                    <TableCell>{entry.employmentType}</TableCell>
+                    <TableCell>
+                      {entry.startDate
+                        ? format(new Date(entry.startDate), 'MMM yyyy')
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {entry.endDate
+                        ? format(new Date(entry.endDate), 'MMM yyyy')
+                        : 'N/A'}
+                    </TableCell>
+                    <TableCell>{`${entry.city}, ${entry.state}, ${entry.country}`}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => removeExperienceEntry(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </form>
     </Form>

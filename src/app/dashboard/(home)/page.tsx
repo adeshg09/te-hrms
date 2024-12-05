@@ -6,14 +6,16 @@ import { stats } from '@/constants';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
 
-
-
 function Dashboard() {
   useEffect(() => {
-    const user = getCurrentUser();
-    if (!user) {
-      redirect('/login');
-    }
+    const fetchUser = async () => {
+      const user = await getCurrentUser();
+      console.log('user is', user);
+      if (!user) {
+        redirect('/login');
+      }
+    };
+    fetchUser();
   }, []);
 
   return (
@@ -36,4 +38,3 @@ function Dashboard() {
 }
 
 export default Dashboard;
-

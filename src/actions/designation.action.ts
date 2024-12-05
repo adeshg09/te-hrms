@@ -103,8 +103,11 @@ export const deleteDesignation = async (id: number) => {
 
 export const getAllDesignations = async () => {
   try {
-    const designations = await db.designation.findMany();
-    
+    const designations = await db.designation.findMany({
+      include: {
+        employees:true
+      }
+    });
     if (!designations || designations.length === 0) {
       return { 
         designations: [], 
@@ -112,8 +115,7 @@ export const getAllDesignations = async () => {
       };
     }
     
-    const designationNames = designations.map(designation => designation.designationName);
-    
+
     return { 
       designations, 
     };
@@ -125,3 +127,20 @@ export const getAllDesignations = async () => {
     };
   }
 };
+
+export const getDesignationById=async(id:number)=>{
+  try {
+    const designation = await db.designation.findUnique({
+      where: {
+        designationId: id,
+      }
+    })
+    if (!designation) {
+      return { designation: null, error: 'Designation not found' };
+    }
+    return designation.designationName;
+  }catch(e:any){
+    console.error('error in getDesignationById:', e);
+    return { designation: null, error: e.message };
+  }
+}

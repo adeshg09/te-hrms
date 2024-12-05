@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+//auth form schema
 export const loginSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
@@ -15,6 +16,8 @@ export const ResetPasswordSchema = z.object({
   confirmPassword: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
+//create role and designation schema
+
 export const createRoleSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   description: z.string().min(3, 'Description must be at least 3 characters'),
@@ -25,6 +28,10 @@ export const createDesignationSchema = z.object({
   description: z.string().min(3, 'Description must be at least 3 characters'),
 });
 
+
+
+// employee onboarding forms schema
+
 export const basicDetailsSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
   middleName: z.string().optional(),
@@ -33,24 +40,31 @@ export const basicDetailsSchema = z.object({
   emailId: z.string().email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   profileUrl: z.string().url('Invalid URL format'),
-  roles: z
-  .array(
+  roles: z.array(
     z.object({
       roleId: z.number().min(1, 'Role ID must be a valid number'),
+    }),
+  ),
+  isActive: z.boolean().default(true),
+  showActivity: z.boolean().default(true),
+  dateOfBirth: z
+    .date({
+      required_error: 'Date of birth is required',
+      invalid_type_error: 'Date of birth must be a valid date',
     })
-  )
-  .optional(),
-  isActive: z.boolean().default(true).optional(),
-  showActivity: z.boolean().default(true).optional(),
-  dateOfBirth: z.date({
-    required_error: "Date of birth is required",
-    invalid_type_error: "Date of birth must be a valid date"
-  }).refine((date) => {
-    // Optional: Add age validation (e.g., minimum 18 years old)
-    const today = new Date();
-    const minAgeDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    return date <= minAgeDate;
-  }, { message: "Must be at least 18 years old" }),
+    .refine(
+      (date) => {
+        // Optional: Add age validation (e.g., minimum 18 years old)
+        const today = new Date();
+        const minAgeDate = new Date(
+          today.getFullYear() - 18,
+          today.getMonth(),
+          today.getDate(),
+        );
+        return date <= minAgeDate;
+      },
+      { message: 'Must be at least 18 years old' },
+    ),
   age: z.number().min(18, 'Age must be at least 18'),
   gender: z.enum(['Male', 'Female', 'Other']),
   maritalStatus: z.enum(['Single', 'Married', 'Divorced', 'Widowed']),
@@ -88,24 +102,24 @@ export const addressDetailsSchema = z.object({
 
 export const educationalDetailsSchema = z.object({
   course: z.enum([
-    'Std 10th',
-    'Std 12th',
+    'Std10th',
+    'Std12th',
     'Graduation',
-    'Post Graduation',
+    'PostGraduation',
     'Others',
   ]),
   degreeSpecialization: z.string().min(1, 'Specialization is required'),
   instituteUniversityName: z.string().min(1, 'Institute name is required'),
-  fromDate:z.date({
-    required_error: "Start Date is required",
-    invalid_type_error: "Start Datemust be a valid date"
+  fromDate: z.date({
+    required_error: 'Start Date is required',
+    invalid_type_error: 'Start Datemust be a valid date',
   }),
-  toDate:z.date({
-    required_error: "End Date is required",
-    invalid_type_error: "End Date must be a valid date"
+  toDate: z.date({
+    required_error: 'End Date is required',
+    invalid_type_error: 'End Date must be a valid date',
   }),
-  status: z.enum(['Completed', 'In Process', 'Dropped']),
-  studyMode: z.enum(['Full Time', 'Correspondence', 'Part Time']),
+  status: z.enum(['Completed', 'InProcess', 'Dropped']),
+  studyMode: z.enum(['FullTime', 'Correspondence', 'PartTime']),
   percentage: z.number().min(0, 'Percentage must be a positive number'),
 });
 
@@ -120,7 +134,10 @@ export const familyDetailsSchema = z.object({
   ]),
   name: z.string().min(1, 'Name is required'),
   age: z.number().min(1, 'Age must be a positive number'),
-  dateOfBirth: z.string().transform((val) => new Date(val)),
+  dateOfBirth: z.date({
+    required_error: 'Date of birth is required',
+    invalid_type_error: 'Date of birth must be a valid date',
+  }),
   currentAddress: z.string().min(1, 'Current address is required'),
   birthCountry: z.string().min(1, 'Birth country is required'),
   birthState: z.string().min(1, 'Birth state is required'),
@@ -142,7 +159,10 @@ export const profBasicDetailsSchema = z.object({
   designation: z.string().min(1, 'Designation is required'),
   employmentType: z.enum(['FullTime', 'PartTime', 'Internship']),
   workingType: z.enum(['Office', 'Remote', 'Hybrid']),
-  dateOfJoin: z.string().transform((val) => new Date(val)),
+  dateOfJoin: z.date({
+    required_error: 'Date of Join is required',
+    invalid_type_error: 'Date of Join must be a valid date',
+  }),
   signatureUrl: z.string().url('Invalid URL format'),
 });
 
@@ -150,11 +170,14 @@ export const experienceDetailsSchema = z.object({
   empName: z.string().min(1, 'Employer name is required'),
   empId: z.string().min(1, 'Employer ID is required'),
   jobTitle: z.string().min(1, 'Job title is required'),
-  startDate: z.string().transform((val) => new Date(val)),
-  endDate: z
-    .string()
-    .optional()
-    .transform((val) => (val ? new Date(val) : undefined)),
+  startDate: z.date({
+    required_error: 'Start Date is required',
+    invalid_type_error: 'Start Datemust be a valid date',
+  }),
+  endDate: z.date({
+    required_error: 'End Date is required',
+    invalid_type_error: 'End Date must be a valid date',
+  }),
   country: z.string().min(1, 'Country is required'),
   state: z.string().min(1, 'State is required'),
   city: z.string().min(1, 'City is required'),
@@ -174,17 +197,17 @@ export const documentUrlsSchema = z.object({
   ]),
   documentUrl: z.string().url('Invalid document URL'),
   submitted: z.boolean(),
-  submissionDate: z.string().transform((val) => new Date(val)),
+  submissionDate: z.date(),
 });
 
-// Main schema
+// Main schema-- create employee schema
 export const createEmployeeSchema = z.object({
   personalDetails: z.object({
     basicDetails: basicDetailsSchema,
     addressDetails: z.array(addressDetailsSchema),
     educationalDetails: z.array(educationalDetailsSchema),
     familyDetails: z.array(familyDetailsSchema),
-    emergencyContactDetails: emergencyContactDetailsSchema,
+    emergencyContactDetails: z.array(emergencyContactDetailsSchema),
   }),
   professionalDetails: z.object({
     basicDetails: profBasicDetailsSchema,

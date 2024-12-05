@@ -128,25 +128,29 @@ export const bloodGroups = [
 export const marritalStatus = ['Married', 'Single', 'Divorced', 'Widowed'];
 
 export const educationCourse = [
-  'Std 10th',
-  'Std 12th',
+  'Std10th',
+  'Std12th',
   'Graduation',
-  'Post Graduation',
+  'PostGraduation',
   'Others',
 ];
 
-export const educationStatus=[
-  'Completed',
-  'In Process',
-  'Dropped'
-]
+export const educationStatus = ['Completed', 'InProcess', 'Dropped'];
 
-export const studyMode=[
-  'Full Time',
-  'Part Time',
-  'Correspondence',
+export const studyMode = ['FullTime', 'PartTime', 'Correspondence'];
 
-]
+export const familyRelation = [
+  'Father',
+  'Mother',
+  'Brother',
+  'Sister',
+  'Spouse',
+  'Other',
+];
+
+export const employementType = ['FullTime', 'PartTime', 'Internship'];
+
+export const workingType = ['Office', 'Remote', 'Hybrid'];
 
 export const basicDetailsInitialValues = {
   firstName: '',

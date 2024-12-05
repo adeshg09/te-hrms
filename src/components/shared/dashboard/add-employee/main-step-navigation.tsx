@@ -20,14 +20,14 @@ export const MainStepNavigation: React.FC = () => {
   };
 
   return (
-    <div className="flex w-full items-center overflow-x-auto">
+    <div className="flex w-full items-center ">
       {MAIN_STEP_DATA.map((step, idx) => {
         const isActive = step.label === activeStep;
         return (
           <div
             key={idx}
             className={cn(
-              'flex flex-1 items-center justify-center py-4 px-2 cursor-pointer transition-all duration-300 group',
+              'flex flex-1 items-center justify-center py-2 px-2 cursor-pointer transition-all duration-300 group',
               'relative',
               isActive
                 ? 'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-primary-default'

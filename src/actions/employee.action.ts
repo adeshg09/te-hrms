@@ -8,25 +8,17 @@ import { db } from '@/lib/db';
 import { EmployeeFormData } from '@/types/form';
 
 export const getEmployeeById = async (employeeId: number) => {
-  return await db.employee.findUnique({
+  const employee = await db.employee.findUnique({
     where: { employeeId },
-    include: {
-      personalDetails: true,
-      address: true,
-      familyDetails: true,
-      emergencyContacts: true,
-      experienceDetail: true,
-      attachments: true,
-      user: {
-        include: {
-          roles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-      },
-    },
+    // include: {
+    //   personalDetails: true,
+    //   address: true,
+    //   familyDetails: true,
+    //   emergencyContacts: true,
+    //   experienceDetail: true,
+    //   attachments: true,
+    //   user: true,
+    // },
   });
 };
 
@@ -36,7 +28,6 @@ export const createEmployee = async (data: EmployeeFormData) => {
     console.log('Received data:', data);
     const validatedData = createEmployeeSchema.parse(data);
     console.log('Validated data:', validatedData);
-
     // Destructure Personal Details
     const {
       firstName,
@@ -56,7 +47,6 @@ export const createEmployee = async (data: EmployeeFormData) => {
       birthLocation,
       gender,
       maritalStatus,
-      dateOfMarriage,
       bloodGroup,
       panNo,
       caste,
@@ -142,7 +132,7 @@ export const createEmployee = async (data: EmployeeFormData) => {
       throw new Error('email already exists');
     }
 
-    // Create User
+    // Create User (no employee id)
     const newUser = await db.user.create({
       data: {
         firstName,
@@ -175,6 +165,8 @@ export const createEmployee = async (data: EmployeeFormData) => {
     });
     console.log('New Employee:', newEmployee);
 
+    //update user with employee id
+
     const updatedUser = await db.user.update({
       where: { userId: newUser.userId },
       data: {
@@ -193,7 +185,6 @@ export const createEmployee = async (data: EmployeeFormData) => {
         birthLocation,
         gender,
         maritalStatus,
-        dateOfMarriage,
         bloodGroup,
         panNo,
         caste,
@@ -256,14 +247,14 @@ export const createEmployee = async (data: EmployeeFormData) => {
     console.log('Family details created.');
 
     // Create Emergency Contact
-    await db.emergencyContactDetail.create({
-      data: {
+    await db.emergencyContactDetail.createMany({
+      data: emergencyContactDetails.map((contact) => ({
         employeeId: newEmployee.employeeId,
-        contactName: emergencyContactDetails.contactName,
-        contactAddress: emergencyContactDetails.contactAddress,
-        relationToEmployee: emergencyContactDetails.relationToEmployee,
-        contactNumber: emergencyContactDetails.contactNumber,
-      },
+        contactName: contact.contactName,
+        contactAddress: contact.contactAddress,
+        relationToEmployee: contact.relationToEmployee,
+        contactNumber: contact.contactNumber,
+      })),
     });
     console.log('Emergency contact created.');
 
@@ -345,4 +336,31 @@ export const deleteEmployee = async (employeeId: number) => {
     // Finally, delete the employee
     return await tx.employee.delete({ where: { employeeId } });
   });
+};
+
+export const getAllEmployees = async () => {
+  try {
+    const employees = await db.employee.findMany({
+      include: {
+        personalDetails: true,
+        address: true,
+        familyDetails: true,
+        emergencyContacts: true,
+        experienceDetail: true,
+        attachments: true,
+        user: true,
+      },
+    });
+    return {
+      success: true,
+      data: employees,
+      message: 'Employees Data Fetched Successfully',
+    };
+  } catch (e: any) {
+    return {
+      success: false,
+      error: 'Failed to fetch employees',
+      details: e.message,
+    };
+  }
 };

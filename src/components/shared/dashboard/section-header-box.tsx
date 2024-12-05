@@ -19,7 +19,7 @@ interface SectionHeaderBoxProps {
 const SectionHeaderBox = ({ link, title, type }: SectionHeaderBoxProps) => {
   const router = useRouter();
   return (
-    <div className="flex w-full items-center justify-between   sm:flex-row md:p-4 sm:p-3 p-2 sm:gap-5 gap-3">
+    <div className="flex w-full items-center justify-between  sm:flex-row md:p-4 sm:p-3 p-2 sm:gap-5 gap-3">
       <div className="relative  flex items-center  w-full sm:w-full">
         <Input
           type="search"

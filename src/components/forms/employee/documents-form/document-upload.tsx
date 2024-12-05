@@ -1,391 +1,263 @@
-// 'use client';
-
-// import * as React from 'react';
-// import { Button } from '@/components/ui/button';
-// import { Card } from '@/components/ui/card';
-// import { documentUrlsSchema } from '@/lib/validations';
-// import { DocumentUpload } from '@/types/form';
-// import { Loader2 } from 'lucide-react';
-
-// interface FileUploadProps {
-//   title: string;
-//   documentType: DocumentUpload['documentType'];
-//   onFileSelect: (
-//     file: File,
-//     documentType: DocumentUpload['documentType'],
-//   ) => void;
-// }
-
-// function FileUploadBox({ title, documentType, onFileSelect }: FileUploadProps) {
-//   const inputRef = React.useRef<HTMLInputElement>(null);
-
-//   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     if (e.target.files && e.target.files[0]) {
-//       onFileSelect(e.target.files[0], documentType);
-//     }
-//   };
-
-//   return (
-//     <div className="space-y-2">
-//       <h2 className="text-sm font-medium text-gray-700">{title}</h2>
-//       <Card className="border border-gray-300 bg-white p-6">
-//         <div className="flex flex-col items-center space-y-4">
-//           <div className="rounded-full bg-secondary-default p-3">
-//             <svg
-//               width="24"
-//               height="24"
-//               viewBox="0 0 24 24"
-//               fill="none"
-//               xmlns="http://www.w3.org/2000/svg"
-//             >
-//               <path
-//                 d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-//                 stroke="white"
-//                 strokeWidth="2"
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//               />
-//               <path
-//                 d="M7 10L12 15L17 10"
-//                 stroke="white"
-//                 strokeWidth="2"
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//               />
-//               <path
-//                 d="M12 15V3"
-//                 stroke="white"
-//                 strokeWidth="2"
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//               />
-//             </svg>
-//           </div>
-//           <div className="text-center">
-//             <p className="text-sm text-gray-600">
-//               Drag & Drop or{' '}
-//               <button
-//                 onClick={() => inputRef.current?.click()}
-//                 className="text-secondary-default hover:underline"
-//               >
-//                 choose file
-//               </button>{' '}
-//               to upload
-//             </p>
-//             <p className="text-xs text-gray-400">
-//               Supported formats : Jpeg, pdf
-//             </p>
-//           </div>
-//         </div>
-//         <input
-//           type="file"
-//           ref={inputRef}
-//           onChange={handleFileSelect}
-//           accept=".jpg,.jpeg,.pdf"
-//           className="hidden"
-//         />
-//       </Card>
-//     </div>
-//   );
-// }
-
-// export default function DocumentUpload() {
-//   const [isLoading, setIsLoading] = React.useState(false);
-//   const [documents, setDocuments] = React.useState<
-//     Partial<Record<DocumentUpload['documentType'], DocumentUpload>>
-//   >({});
-
-//   const handleFileSelect = async (
-//     file: File,
-//     documentType: DocumentUpload['documentType'],
-//   ) => {
-//     try {
-//       // Here you would typically upload the file to your server or cloud storage
-//       // and get back a URL. For this example, we'll use a placeholder URL.
-//       const documentUrl = 'https://example.com/uploaded-document.pdf';
-
-//       const newDocument: DocumentUpload = {
-//         documentType,
-//         documentUrl,
-//         submitted: true,
-//         submissionDate: new Date().toISOString(),
-//       };
-
-//       // Validate the document data
-//       documentUrlsSchema.parse(newDocument);
-
-//       // If validation passes, update the state
-//       setDocuments((prev) => ({
-//         ...prev,
-//         [documentType]: newDocument,
-//       }));
-
-//       console.log(`Document ${documentType} uploaded successfully`);
-//     } catch (error) {
-//       console.error('Error uploading document:', error);
-//     }
-//   };
-
-//   const documentTypes: Array<{
-//     type: DocumentUpload['documentType'];
-//     title: string;
-//   }> = [
-//     {
-//       type: 'DegreeCertificatesMarksheets',
-//       title: 'Degree Certificates & Marksheets',
-//     },
-//     { type: 'BirthProof', title: 'Birth Proof' },
-//     { type: 'ExperienceCertificate', title: 'Experience Certificate' },
-//     { type: 'RelievingLetter', title: 'Relieving Letter' },
-//     { type: 'AadharPhotoCopy', title: 'Aadhar Photo Copy' },
-//     { type: 'PanPhotoCopy', title: 'PAN Photo Copy' },
-//   ];
-
-//   return (
-//     <div className="flex flex-col gap-5 w-full h-full ">
-//       <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1">
-//         {documentTypes.map(({ type, title }) => (
-//           <FileUploadBox
-//             key={type}
-//             title={title}
-//             documentType={type}
-//             onFileSelect={handleFileSelect}
-//           />
-//         ))}
-//       </div>
-//       <div className="flex items-center gap-5  justify-end">
-//         <Button
-//           type="submit"
-//           className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
-//           size="lg"
-//           disabled={isLoading}
-//         >
-//           {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Submit'}
-//         </Button>
-//         <Button
-//           type="button"
-//           className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
-//           size="lg"
-//           onClick={() => {}}
-//         >
-//           Back
-//         </Button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
 'use client';
 
-import * as React from 'react';
+import React, {  useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormMessage 
-} from '@/components/ui/form';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { FileUp, Loader2 } from 'lucide-react';
+
+import { DocumentUpload, EmployeeFormData } from '@/types/form';
+import toast from 'react-hot-toast';
+import { useMultiStepForm } from '@/hooks/use-multistep-form';
 import { documentUrlsSchema } from '@/lib/validations';
-import { DocumentUpload } from '@/types/form';
-import { Loader2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { createEmployee } from '@/actions/employee.action';
+import { useRouter } from 'next/navigation';
 
-interface DocumentUploadFormProps {
-  onFileSelect?: (
-    file: File,
-    documentType: DocumentUpload['documentType'],
-  ) => void;
-}
+// Import context
 
-export default function DocumentUploadForm({ onFileSelect }: DocumentUploadFormProps) {
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [documents, setDocuments] = React.useState<
-    Partial<Record<DocumentUpload['documentType'], DocumentUpload>>
-  >({});
+// Document types configuration
+const documentTypeConfigs = [
+  {
+    type: 'DegreeCertificatesMarksheets',
+    title: 'Degree Certificates & Marksheets',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+  {
+    type: 'BirthProof', 
+    title: 'Birth Proof',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+  {
+    type: 'ExperienceCertificate',
+    title: 'Experience Certificate',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+  {
+    type: 'RelievingLetter',
+    title: 'Relieving Letter',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+  {
+    type: 'AadharPhotoCopy',
+    title: 'Aadhar Photo Copy',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+  {
+    type: 'PanPhotoCopy',
+    title: 'PAN Photo Copy',
+    accept: '.pdf,.jpg,.jpeg',
+  },
+];
 
-  const documentTypes: Array<{
-    type: DocumentUpload['documentType'];
-    title: string;
-  }> = [
-    {
-      type: 'DegreeCertificatesMarksheets',
-      title: 'Degree Certificates & Marksheets',
-    },
-    { type: 'BirthProof', title: 'Birth Proof' },
-    { type: 'ExperienceCertificate', title: 'Experience Certificate' },
-    { type: 'RelievingLetter', title: 'Relieving Letter' },
-    { type: 'AadharPhotoCopy', title: 'Aadhar Photo Copy' },
-    { type: 'PanPhotoCopy', title: 'PAN Photo Copy' },
-  ];
+export default function DocumentUploadForm() {
+  const {
+    activeStep,
+    setActiveStep,
+    currentSubStep,
+    setCurrentSubStep,
+    updateFormData,
+    formData,
+  } = useMultiStepForm();
 
-  const fileUploadSchema = z.object({
-    documentType: z.enum([
-      'DegreeCertificatesMarksheets',
-      'BirthProof',
-      'ExperienceCertificate',
-      'RelievingLetter',
-      'AadharPhotoCopy',
-      'PanPhotoCopy'
-    ]),
-    file: z.instanceof(File).optional()
-  });
+  // State for tracking uploads
+  const [uploadedDocuments, setUploadedDocuments] = useState<DocumentUpload[]>(
+    formData.documentUpload || [],
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const router=useRouter();
 
-  const form = useForm<z.infer<typeof fileUploadSchema>>({
-    resolver: zodResolver(fileUploadSchema),
-    defaultValues: {
-      documentType: undefined,
-      file: undefined
-    }
-  });
-
-  const handleFileSelect = async (
+  // File upload handler
+  const handleFileUpload = async (
     file: File,
     documentType: DocumentUpload['documentType'],
   ) => {
+    setIsLoading(true);
     try {
-      // Here you would typically upload the file to your server or cloud storage
-      // and get back a URL. For this example, we'll use a placeholder URL.
-      const documentUrl = 'https://example.com/uploaded-document.pdf';
+      // Validate file type and size
+      if (!['application/pdf', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+        throw new Error('Invalid file type. Only PDF and JPEG are allowed.');
+      }
 
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        throw new Error('File size should not exceed 5MB');
+      }
+
+      // Simulate file upload (replace with actual upload logic)
+      const documentUrl = await uploadToCloudStorage(file);
+
+      // Create document upload object
       const newDocument: DocumentUpload = {
         documentType,
         documentUrl,
         submitted: true,
-        submissionDate: new Date().toISOString(),
+        submissionDate: new Date(),
       };
 
-      // Validate the document data
+      // Validate against schema
       documentUrlsSchema.parse(newDocument);
 
-      // If validation passes, update the state
-      setDocuments((prev) => ({
-        ...prev,
-        [documentType]: newDocument,
-      }));
+      // Update local state
+      const updatedDocuments = [
+        ...uploadedDocuments.filter((doc) => doc.documentType !== documentType),
+        newDocument,
+      ];
 
-      console.log(`Document ${documentType} uploaded successfully`);
+      setUploadedDocuments(updatedDocuments);
+
+      // Update context
+      updateFormData({
+        documentUpload: updatedDocuments,
+      });
+
+      toast.success(`${documentType} uploaded successfully`);
     } catch (error) {
-      console.error('Error uploading document:', error);
+      toast.error(error instanceof Error ? error.message : 'Upload failed');
+      console.error('Document upload error:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const onSubmit = (values: z.infer<typeof fileUploadSchema>) => {
-    setIsLoading(true);
-    // Simulate submission
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+  // Proceed to next step
+  const handleProceed = async () => {
+    // Validate all required documents are uploaded
+    const requiredDocumentTypes = documentTypeConfigs.map((doc) => doc.type);
+    const uploadedTypes = uploadedDocuments.map((doc) => doc.documentType);
+
+    const missingDocuments = requiredDocumentTypes.filter(
+      (type) => !uploadedTypes.includes(type),
+    );
+
+    if (missingDocuments.length > 0) {
+      return;
+    }
+
+    console.log('formData is', formData);
+
+    const employeeFinalData: EmployeeFormData = {
+      personalDetails: {
+        basicDetails: formData.basicDetails ,
+        addressDetails: formData.addressDetails,
+        educationalDetails: formData.educationalDetails,
+        familyDetails: formData.familyDetails,
+        emergencyContactDetails: formData.emergencyContactDetails,
+      },
+      professionalDetails: {
+        basicDetails: formData.profBasicDetails,
+        experienceDetails: formData.experienceDetails,
+      },
+      documentUrls: formData.documentUpload,
+    };
+
+    const {success,message,error} = await createEmployee(employeeFinalData);
+    if(success && message){
+      toast.success(message);
+      router.push('/dashboard/employees')
+    }else{
+      
+      error && toast.error(error)
+    }
+  };
+
+  const onBack = () => {
+    // Logic for navigating backwards through substeps and main steps
+
+    setActiveStep('Professional Details');
+    setCurrentSubStep(1);
   };
 
   return (
-    <Form {...form}>
-      <form 
-        onSubmit={form.handleSubmit(onSubmit)} 
-        className="flex flex-col gap-5 w-full h-full"
-      >
-        <div className="flex flex-col gap-5 overflow-y-scroll md:h-[330px] sm:h-[324px] h-[344px] scrollbar-none">
-          <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1">
-            {documentTypes.map(({ type, title }) => (
-              <div key={type} className="space-y-2">
-                <h2 className="text-sm font-medium text-gray-700">{title}</h2>
-                <Card className="border border-gray-300 bg-white p-6">
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="rounded-full bg-secondary-default p-3">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+    <div className="space-y-6 ">
+      <div className="grid gap-6 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 h-[500px]  sm:h-fit scrollbar-none overflow-x-auto">
+        {documentTypeConfigs.map(({ type, title, accept }) => (
+          <div key={type} className="space-y-2">
+            <h2 className="text-sm font-medium text-gray-700">{title}</h2>
+            <Card
+              className={`border ${
+                uploadedDocuments.some((doc) => doc.documentType === type)
+                  ? 'border-green-500 bg-green-50'
+                  : 'border-gray-300 bg-white'
+              } p-6`}
+            >
+              <div className="flex flex-col items-center space-y-4">
+                <div className="rounded-full bg-secondary-default p-3">
+                  <FileUp className="text-white" />
+                </div>
+                <div className="text-center">
+                  {uploadedDocuments.some(
+                    (doc) => doc.documentType === type,
+                  ) ? (
+                    <p className="text-sm text-green-600">
+                      Document Uploaded ✓
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-600">
+                      Drag & Drop or{' '}
+                      <input
+                        type="file"
+                        accept={accept}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleFileUpload(file, type);
+                          }
+                        }}
+                        className="hidden"
+                        id={`file-${type}`}
+                      />
+                      <label
+                        htmlFor={`file-${type}`}
+                        className="text-secondary-default hover:underline cursor-pointer"
                       >
-                        <path
-                          d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M7 10L12 15L17 10"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12 15V3"
-                          stroke="white"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-gray-600">
-                        Drag & Drop or{' '}
-                        <input 
-                          type="file"
-                          accept=".jpg,.jpeg,.pdf"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleFileSelect(file, type);
-                            }
-                          }}
-                          className="hidden"
-                          id={`file-${type}`}
-                        />
-                        <label 
-                          htmlFor={`file-${type}`}
-                          className="text-secondary-default hover:underline cursor-pointer"
-                        >
-                          choose file
-                        </label>{' '}
-                        to upload
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Supported formats : Jpeg, pdf
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+                        choose file
+                      </label>{' '}
+                      to upload
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-400">
+                    Supported formats: PDF, JPEG
+                  </p>
+                </div>
               </div>
-            ))}
+            </Card>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="flex items-center gap-5 justify-end">
-          <Button
-            type="submit"
-            className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
-            size="lg"
-            disabled={isLoading}
-          >
-            {isLoading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Submit'}
-          </Button>
-          <Button
-            type="button"
-            className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
-            size="lg"
-            onClick={() => {}}
-          >
-            Back
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div className="flex justify-end space-x-4 mt-6">
+        <Button
+          type="submit"
+          className="bg-primary-default hover:bg-primary-dark text-white rounded-lg "
+          size="lg"
+          onClick={handleProceed}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            'Proceed to Create Employee'
+          )}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="bg-secondary-default hover:bg-secondary-dark text-white rounded-lg"
+          size="lg"
+        >
+          Back to Professional Details
+        </Button>
+      </div>
+    </div>
   );
+}
+
+// Placeholder for cloud storage upload
+async function uploadToCloudStorage(file: File): Promise<string> {
+  // Implement actual cloud storage upload
+  // This is a mock implementation
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(`https://example.com/uploads/${file.name}`);
+    }, 1000);
+  });
 }

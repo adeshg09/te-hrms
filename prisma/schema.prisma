@@ -113,6 +113,8 @@ model PersonalDetail {
   domicile         String // Domicile
   address          Address[] // Employee's address
   educationDetail  EducationalDetail[] // Educational qualifications
+  familyDetails     FamilyDetail[] // Family details linked to the employee
+  emergencyContacts EmergencyContactDetail[] // Emergency contact details linked to the employee
   employee         Employee            @relation(fields: [employeeId], references: [employeeId]) // Link to Employee model
 }
 
@@ -268,6 +270,8 @@ model FamilyDetail {
   occupation     String
   mobileNumber   String
   employee       Employee       @relation(fields: [employeeId], references: [employeeId])
+
+  PersonalDetail PersonalDetail[]
 }
 
 // Enum for family relations (Father, Mother, etc.)
@@ -291,6 +295,8 @@ model EmergencyContactDetail {
   relationToEmployee String
   contactNumber      String
   employee           Employee @relation(fields: [employeeId], references: [employeeId])
+
+  PersonalDetail PersonalDetail[]
 }
 
 // ============================ Attachment Models ============================

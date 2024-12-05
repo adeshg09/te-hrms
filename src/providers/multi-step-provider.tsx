@@ -1,53 +1,51 @@
-// src/context/MultiStepFormContext.tsx
 'use client';
-
-import { basicDetailsFormData, educationDetailsFormData, MainStep, MultiStepFormContextType } from '@/types/form';
 import React, { createContext, useState, ReactNode } from 'react';
+import {
+  MainStep,
+  MultiStepFormContextType,
+} from '@/types/form';
 
+export const MultiStepFormContext = createContext<
+  MultiStepFormContextType | undefined
+>(undefined);
 
-export const MultiStepFormContext = createContext<MultiStepFormContextType & {
-  formData: Partial<basicDetailsFormData | educationDetailsFormData>;
-  updateFormData: (data: Partial<basicDetailsFormData | educationDetailsFormData>) => void;
-}>({
-  activeStep: 'Personal Details',
-  currentSubStep: 0,
-  isMobileMenuOpen: false,
-  formData: {},
-  setActiveStep: () => {},
-  setCurrentSubStep: () => {},
-  setIsMobileMenuOpen: () => {},
-  updateFormData: () => {},
-});
-
-export const MultiStepFormProvider: React.FC<{ children: ReactNode }> = ({ 
-  children 
+export const MultiStepFormProvider = ({
+  children,
+}: {
+  children: ReactNode;
 }) => {
   const [activeStep, setActiveStep] = useState<MainStep>('Personal Details');
   const [currentSubStep, setCurrentSubStep] = useState<number>(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
-  const [formData, setFormData] = useState<Partial<basicDetailsFormData | educationDetailsFormData>>({});
 
-  const updateFormData = (newData: Partial<basicDetailsFormData>) => {
-    setFormData(prev => ({
+  const [formData, setFormData] = useState<
+    MultiStepFormContextType['formData']
+  >({});
+
+  const updateFormData: MultiStepFormContextType['updateFormData'] = (
+    newData,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      newData
+      ...newData,
     }));
-    console.log("updated form dats is",formData)
+  };
+
+  console.log('Updated form data is', formData);
+
+  const contextValue: MultiStepFormContextType = {
+    activeStep,
+    currentSubStep,
+    isMobileMenuOpen,
+    formData,
+    setActiveStep,
+    setCurrentSubStep,
+    setIsMobileMenuOpen,
+    updateFormData,
   };
 
   return (
-    <MultiStepFormContext.Provider 
-      value={{
-        activeStep,
-        currentSubStep,
-        isMobileMenuOpen,
-        formData,
-        setActiveStep,
-        setCurrentSubStep,
-        setIsMobileMenuOpen,
-        updateFormData,
-      }}
-    >
+    <MultiStepFormContext.Provider value={contextValue}>
       {children}
     </MultiStepFormContext.Provider>
   );

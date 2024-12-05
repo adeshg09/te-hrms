@@ -73,9 +73,9 @@ const Sidebar = () => {
           })}
         </div>
 
-        <div className='sm:hidden'>
+        {/* <div className='sm:hidden'>
           <ThemeModeToggle/>
-        </div>
+        </div> */}
         
       </div>
      
