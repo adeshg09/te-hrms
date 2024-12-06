@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .background-light50_dark900 {
+    @apply bg-grey-50 dark:bg-grey-800;
+  }
+
+  .background-light-white_dark900 {
+    @apply bg-white dark:bg-grey-900;
+  }
+
+  .background-light-white_dark-black {
+    @apply bg-white dark:bg-black ;
+  }
+  .background-light_primary_dark_primary {
+    @apply bg-primary-default dark:bg-primary-dark;
+  }
+
+  .text-light50_dark900 {
+    @apply text-grey-50 dark:text-grey-900;
+  }
+
+  .text-light-white_dark900 {
+    @apply text-white dark:text-grey-900
+  }
+
+  .text-light-white_dark-black {
+    @apply text-black dark:text-white;
+  }
+  .text-light_secondary_dark_secondary {
+    @apply text-secondary-default dark:text-secondary-dark;
+  }
+  
+
+  .h1-bold {
+    @apply text-[1.875rem] font-bold leading-[2.625rem] tracking-tighter  ; /* 30px, 42px */
+  }
+
+  .h1-semibold {
+    @apply text-[1.875rem] font-semibold leading-[2.5rem]; /* 30px, 40px */
+  }
+
+  .h2-bold {
+    @apply text-[1.5rem] font-bold leading-[1.95rem]; /* 24px, 31.2px */
+  }
+
+  .h2-semibold {
+    @apply text-[1.5rem] font-semibold leading-[1.95rem]; /* 24px, 31.2px */
+  }
+
+  .h3-bold {
+    @apply text-[1.25rem] font-bold leading-[1.625rem]; /* 20px, 26px */
+  }
+
+  .h3-semibold {
+    @apply text-[1.25rem] font-semibold leading-[1.55rem]; /* 20px, 24.8px */
+  }
+
+  .p-regular {
+    @apply text-[1rem] font-normal leading-[1.4rem]; /* 16px, 22.4px */
+  }
+
+  .p-medium {
+    @apply text-[1rem] font-medium leading-[1.4rem]; /* 16px, 22.4px */
+  }
+
+  .p-semibold {
+    @apply text-[1rem] font-semibold leading-[1.3rem]; /* 16px, 20.8px */
+  }
+
+  .body-regular {
+    @apply text-[0.875rem] font-normal leading-[1.225rem]; /* 14px, 19.6px */
+  }
+
+  .body-medium {
+    @apply text-[0.875rem] font-medium leading-[1.1375rem]; /* 14px, 18.2px */
+  }
+
+  .body-semibold {
+    @apply text-[0.875rem] font-semibold leading-[1.1375rem]; /* 14px, 18.2px */
+  }
+
+  .small-regular {
+    @apply text-[0.75rem] font-normal leading-[0.975rem]; /* 12px, 15.6px */
+  }
+
+  .small-medium {
+    @apply text-[0.75rem] font-medium leading-[0.975rem]; /* 12px, 15.6px */
+  }
+
+  .small-semibold {
+    @apply text-[0.75rem] font-semibold leading-[0.975rem]; /* 12px, 15.6px */
+  }
+
+  .subtle-medium {
+    @apply text-[0.625rem] font-medium leading-[0.8125rem] !important; /* 10px, 13px */
+  }
+
+  .subtle-regular {
+    @apply text-[0.625rem] font-normal leading-[0.8125rem]; /* 10px, 13px */
+  }
+
+  /* .placeholder {
+    @apply placeholder:text-light-400 dark:placeholder:text-light-500;
+  } */
+
+  .invert-colors {
+    @apply invert dark:invert-0;
+  }
+
+  .shadow-light100_dark100 {
+    @apply shadow-light-100 dark:shadow-dark-100;
+  }
+
+  .shadow-light100_darknone {
+    @apply shadow-light-100 dark:shadow-none;
+  }
+}
