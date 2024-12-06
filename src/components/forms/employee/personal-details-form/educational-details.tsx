@@ -58,6 +58,7 @@ const EducationalDetailsForm = () => {
   const [educationDetailsEntries, setEducationDetailsEntries] = useState<
     EducationDetailsFormData[]
   >(existingEducationDetails);
+  const [add,setAdd]=useState(0);
 
   const form = useForm<EducationDetailsFormData>({
     resolver: zodResolver(educationalDetailsSchema),
@@ -86,7 +87,7 @@ const EducationalDetailsForm = () => {
       updateFormData({
         educationalDetails: updatedEntries,
       });
-      toast.success(" Education Details added Successfully");
+      toast.success(' Education Details added Successfully');
 
       // Reset form to default values after adding
       form.reset();
@@ -161,213 +162,222 @@ const EducationalDetailsForm = () => {
     });
   };
 
+  const addData = () => {
+    setAdd(prev=>prev+1)
+    return (
+      <div className="bg-grey-50 flex flex-col gap-5 rounded-lg p-5">
+        {/* Course and Specialization */}
+        <div className="flex flex-col gap-5 md:flex-row">
+          <FormField
+            control={form.control}
+            name="course"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                      <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {educationCourse.map((course) => (
+                      <SelectItem key={course} value={course}>
+                        {course}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="degreeSpecialization"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Input
+                    placeholder="Enter specialization"
+                    {...field}
+                    className="rounded-lg h-12"
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Institute and Percentage */}
+        <div className="flex flex-col gap-5 md:flex-row">
+          <FormField
+            control={form.control}
+            name="instituteUniversityName"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Input
+                    placeholder="Enter institute/university name"
+                    {...field}
+                    className="rounded-lg h-12"
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="percentage"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Input
+                    placeholder="Enter percentage"
+                    {...field}
+                    className="rounded-lg h-12"
+                    value={field.value}
+                    onChange={(e) => {
+                      // Directly set the string value while allowing transformation in Zod
+                      field.onChange(e.target.value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* From and To Dates */}
+        <div className="flex flex-col gap-5 md:flex-row">
+          <FormField
+            control={form.control}
+            name="fromDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col w-full">
+                <FormControl>
+                  <Controller
+                    name="fromDate"
+                    control={form.control}
+                    render={({ field: { onChange, value } }) => (
+                      <DatePicker
+                        startYear={1924}
+                        onSelect={(selectedDate) => {
+                          onChange(selectedDate);
+                        }}
+                        placeholder="Pick a start date"
+                      />
+                    )}
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="toDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col w-full">
+                <FormControl>
+                  <Controller
+                    name="toDate"
+                    control={form.control}
+                    render={({ field: { onChange, value } }) => (
+                      <DatePicker
+                        startYear={1924}
+                        onSelect={(selectedDate) => {
+                          onChange(selectedDate);
+                        }}
+                        placeholder="Pick a end date"
+                      />
+                    )}
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Status and Study Mode */}
+        <div className="flex flex-col gap-5 md:flex-row">
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {educationStatus.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="studyMode"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
+                      <SelectValue placeholder="Select study mode" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {studyMode.map((mode) => (
+                      <SelectItem key={mode} value={mode}>
+                        {mode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage className="text-sm text-red-600" />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Form {...form}>
-      <form
-        
-        className="flex flex-col gap-5 w-full h-full rounded-lg"
-      >
-        <div className="flex flex-col gap-5 overflow-y-scroll h-[290px] scrollbar-none">
-          {/* Course and Specialization */}
-          <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="course"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                        <SelectValue placeholder="Select course" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {educationCourse.map((course) => (
-                        <SelectItem key={course} value={course}>
-                          {course}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="degreeSpecialization"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      placeholder="Enter specialization"
-                      {...field}
-                      className="rounded-lg h-12"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Institute and Percentage */}
-          <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="instituteUniversityName"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      placeholder="Enter institute/university name"
-                      {...field}
-                      className="rounded-lg h-12"
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="percentage"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormControl>
-                    <Input
-                      placeholder="Enter percentage"
-                      {...field}
-                      className="rounded-lg h-12"
-                      value={field.value}
-                      onChange={(e) => {
-                        // Directly set the string value while allowing transformation in Zod
-                        field.onChange(e.target.value);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* From and To Dates */}
-          <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="fromDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col w-full">
-                  <FormControl>
-                    <Controller
-                      name="fromDate"
-                      control={form.control}
-                      render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                          startYear={1924}
-                          onSelect={(selectedDate) => {
-                            onChange(selectedDate);
-                          }}
-                          placeholder="Pick a start date"
-                        />
-                      )}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="toDate"
-              render={({ field }) => (
-                <FormItem className="flex flex-col w-full">
-                  <FormControl>
-                    <Controller
-                      name="toDate"
-                      control={form.control}
-                      render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                          startYear={1924}
-                          onSelect={(selectedDate) => {
-                            onChange(selectedDate);
-                          }}
-                          placeholder="Pick a end date"
-                        />
-                      )}
-                    />
-                  </FormControl>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Status and Study Mode */}
-          <div className="flex flex-col gap-5 md:flex-row">
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {educationStatus.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="studyMode"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="rounded-lg h-12 bg-white border-grey-200">
-                        <SelectValue placeholder="Select study mode" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {studyMode.map((mode) => (
-                        <SelectItem key={mode} value={mode}>
-                          {mode}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage className="text-sm text-red-600" />
-                </FormItem>
-              )}
-            />
-          </div>
+      <form className="flex flex-col gap-5 w-full h-full rounded-lg ">
+        <div className="flex flex-col gap-5 overflow-y-scroll h-[270px] scrollbar-none ">
+          {
+            add > 0 && 
+          addData()
+          }
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-5 justify-end">
           <Button
-          onClick={onSubmit}
+            onClick={onSubmit}
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
             disabled={isLoading}
@@ -386,7 +396,7 @@ const EducationalDetailsForm = () => {
             type="button"
             className="bg-primary-default hover:bg-primary-dark text-white rounded-lg"
             size="lg"
-            onClick={addEntry}
+            onClick={addData}
           >
             {isLoading ? (
               <Loader2 className="animate-spin h-5 w-5" />
