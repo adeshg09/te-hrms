@@ -72,7 +72,7 @@ const EducationalDetailsForm = () => {
       studyMode: formData.educationalDetails?.[0]?.studyMode || undefined,
       fromDate: formData.educationalDetails?.[0]?.fromDate,
       toDate: formData.educationalDetails?.[0]?.toDate,
-      percentage: formData.educationalDetails?.[0]?.percentage || '',
+      percentage: formData.educationalDetails?.[0]?.percentage ?? undefined,
     },
   });
 

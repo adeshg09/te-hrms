@@ -133,9 +133,7 @@ const ProfBasicDetailsForm = () => {
       updateFormData({
         profBasicDetails: values,
       });
-      toast.success(" Professional Basic Details submitted Successfully");
-
-      
+      toast.success(' Professional Basic Details submitted Successfully');
     } catch (error) {
       console.error('Submission error:', error);
     } finally {
@@ -143,14 +141,14 @@ const ProfBasicDetailsForm = () => {
     }
   };
 
-  const onNext=()=>{
+  const onNext = () => {
     if (currentSubStep < 1) {
       setCurrentSubStep(currentSubStep + 1);
     } else {
       setActiveStep('Documents');
       setCurrentSubStep(0);
     }
-  }
+  };
 
   const onBack = async () => {
     if (currentSubStep > 0) {
@@ -272,7 +270,7 @@ const ProfBasicDetailsForm = () => {
                           onSelect={(selectedDate) => {
                             onChange(selectedDate);
                           }}
-                          placeholder='Pick date of join'
+                          placeholder="Pick date of join"
                         />
                       )}
                     />
@@ -360,11 +358,7 @@ const ProfBasicDetailsForm = () => {
             disabled={isLoading}
             onClick={onNext}
           >
-            { currentSubStep < 4 ? (
-              'Next'
-            ) : (
-              'Proceed to Professional Details'
-            )}
+            {currentSubStep < 4 ? 'Next' : 'Proceed to Professional Details'}
           </Button>
           <Button
             type="button"
