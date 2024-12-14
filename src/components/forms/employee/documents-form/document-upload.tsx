@@ -1,6 +1,6 @@
 'use client';
 
-import React, {  useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { FileUp, Loader2 } from 'lucide-react';
@@ -12,43 +12,57 @@ import { documentUrlsSchema } from '@/lib/validations';
 import { createEmployee } from '@/actions/employee.action';
 import { useRouter } from 'next/navigation';
 
-// Document types configuration
-const documentTypeConfigs = [
+// Precise type definition for document types
+type DocumentType =
+  | 'DegreeCertificatesMarksheets'
+  | 'BirthProof'
+  | 'ExperienceCertificate'
+  | 'RelievingLetter'
+  | 'AadharPhotoCopy'
+  | 'PanPhotoCopy';
+
+// Document types configuration with precise typing
+const documentTypeConfigs: Array<{
+  type: DocumentType;
+  title: string;
+  accept: string;
+  required: boolean;
+}> = [
   {
     type: 'DegreeCertificatesMarksheets',
     title: 'Degree Certificates & Marksheets',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
   {
-    type: 'BirthProof', 
+    type: 'BirthProof',
     title: 'Birth Proof',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
   {
     type: 'ExperienceCertificate',
     title: 'Experience Certificate',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
   {
     type: 'RelievingLetter',
     title: 'Relieving Letter',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
   {
     type: 'AadharPhotoCopy',
     title: 'Aadhar Photo Copy',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
   {
     type: 'PanPhotoCopy',
     title: 'PAN Photo Copy',
     accept: '.pdf,.jpg,.jpeg',
-    required: true
+    required: true,
   },
 ];
 
@@ -62,18 +76,15 @@ export default function DocumentUploadForm() {
     formData,
   } = useMultiStepForm();
 
-  // State for tracking uploads
+  // State for tracking uploads with precise typing
   const [uploadedDocuments, setUploadedDocuments] = useState<DocumentUpload[]>(
     formData.documentUpload || [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // File upload handler
-  const handleFileUpload = async (
-    file: File,
-    documentType: DocumentUpload['documentType'],
-  ) => {
+  // File upload handler with precise type
+  const handleFileUpload = async (file: File, documentType: DocumentType) => {
     setIsLoading(true);
     try {
       // Validate file type and size
@@ -124,12 +135,14 @@ export default function DocumentUploadForm() {
 
   // Proceed to next step
   const handleProceed = async () => {
-    // Validate all required documents are uploaded
-    const requiredDocumentTypes = documentTypeConfigs
-      .filter(doc => doc.required)
+    // Validate all required documents are uploaded with precise typing
+    const requiredDocumentTypes: DocumentType[] = documentTypeConfigs
+      .filter((doc) => doc.required)
       .map((doc) => doc.type);
-    
-    const uploadedTypes = uploadedDocuments.map((doc) => doc.documentType);
+
+    const uploadedTypes: DocumentType[] = uploadedDocuments.map(
+      (doc) => doc.documentType as DocumentType, // Explicit type assertion
+    );
 
     const missingDocuments = requiredDocumentTypes.filter(
       (type) => !uploadedTypes.includes(type),
@@ -138,12 +151,13 @@ export default function DocumentUploadForm() {
     // If there are missing documents, show toast with specific details
     if (missingDocuments.length > 0) {
       const missingDocumentTitles = missingDocuments.map(
-        type => documentTypeConfigs.find(doc => doc.type === type)?.title || type
+        (type) =>
+          documentTypeConfigs.find((doc) => doc.type === type)?.title || type,
       );
-      
+
       toast.error(
         `Please upload the following required documents: \n${missingDocumentTitles.join(', ')}`,
-        { duration: 4000 }
+        { duration: 4000 },
       );
       return;
     }
@@ -151,21 +165,21 @@ export default function DocumentUploadForm() {
     // Proceed with employee creation if all documents are uploaded
     const employeeFinalData: EmployeeFormData = {
       personalDetails: {
-        basicDetails: formData.basicDetails,
-        addressDetails: formData.addressDetails,
-        educationalDetails: formData.educationalDetails,
-        familyDetails: formData.familyDetails,
-        emergencyContactDetails: formData.emergencyContactDetails,
+        basicDetails: formData.basicDetails!, // Non-null assertion
+        addressDetails: formData.addressDetails ?? [],
+        educationalDetails: formData.educationalDetails ?? [],
+        familyDetails: formData.familyDetails ?? [],
+        emergencyContactDetails: formData.emergencyContactDetails ?? [],
       },
       professionalDetails: {
-        basicDetails: formData.profBasicDetails,
-        experienceDetails: formData.experienceDetails,
+        basicDetails: formData.profBasicDetails!, // Non-null assertion
+        experienceDetails: formData.experienceDetails ?? [],
       },
-      documentUrls: formData.documentUpload,
+      documentUrls: formData.documentUpload ?? [],
     };
 
-    const {success, message, error} = await createEmployee(employeeFinalData);
-    if(success && message){
+    const { success, message, error } = await createEmployee(employeeFinalData);
+    if (success && message) {
       toast.success(message);
       router.push('/dashboard/employees');
     } else {

@@ -1,27 +1,25 @@
 'use client';
 
-import React, { 
-  createContext, 
-  useState, 
-  useContext, 
-  useEffect, 
-  ReactNode 
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  ReactNode,
 } from 'react';
 import { getCurrentUser } from '@/actions/session.action';
 import { redirect } from 'next/navigation';
 import { User } from '@prisma/client';
 
-
-
 // Create the context
 const UserContext = createContext<{
-  user: User;
-  setUser: React.Dispatch<React.SetStateAction<User>>;
-}>
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+}>({ user: null, setUser: () => {} });
 
 // Create a provider component
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,9 +27,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       try {
         const userData = await getCurrentUser();
         setUser(userData);
-        
+
         if (!userData) {
           redirect('/login');
+          return; // Prevent further rendering
         }
       } catch (error) {
         console.error('Failed to fetch user', error);
@@ -45,8 +44,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   if (loading) {
-    // Optionally, you can return a loading spinner or placeholder
-    return <div>Loading...</div>;
+    return <div>Loading user information...</div>; // Improved loading message
+  }
+
+  if (!user) {
+    return null; // Prevent rendering if user is not available
   }
 
   return (
@@ -59,10 +61,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
 // Custom hook to use the user context
 export function useUser() {
   const context = useContext(UserContext);
-  
+
   if (context === undefined) {
     throw new Error('useUser must be used within a UserProvider');
   }
-  
+
   return context;
 }

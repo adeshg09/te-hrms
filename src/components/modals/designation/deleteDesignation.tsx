@@ -26,12 +26,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Pencil, Plus, Trash } from "lucide-react";
 import { Textarea } from "../../ui/textarea";
-import { createDesignationSchema } from "@/lib/validator";
-import { createDesignation, deleteDesignation, getAllDesignations } from "@/actions/designation";
-import { toast } from "react-toastify";
-import { designation } from "@prisma/client";
 
-const DeleteDesignation = ({ designation }:designation) => {
+import { toast } from "react-toastify";
+import { Designation } from "@prisma/client";
+import { deleteDesignation } from "@/actions/designation.action";
+
+const DeleteDesignation = ({ designation }: {
+    designation: Designation
+}) => {
     const [open, setOpen] = useState<boolean>(false);
 
 
@@ -39,7 +41,7 @@ const DeleteDesignation = ({ designation }:designation) => {
 
     const handleDelete = async () => {
         try {
-            const result = await deleteDesignation(designation.id);
+            const result = await deleteDesignation(designation.designationId);
             if (result?.error) {
                 toast.error(result.error)
             } else {

@@ -25,6 +25,6 @@ export type Designation = {
   designationId: number;
   designationName: string;
   designationDescription: string | null;
-  employees:User[]
+  // employees:User[]
 };
 

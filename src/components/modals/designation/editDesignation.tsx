@@ -26,27 +26,31 @@ import {
 import { Input } from "@/components/ui/input";
 import { Pencil, Plus } from "lucide-react";
 import { Textarea } from "../../ui/textarea";
-import { createDesignationSchema } from "@/lib/validator";
-import { createDesignation, editDesignation } from "@/actions/designation";
-import { toast } from "react-toastify";
-import { designation } from "@prisma/client";
-import { DesignationFormData } from "@/types/form";
 
-const EditDesignation = ({designation}:designation) => {
+
+import { toast } from "react-toastify";
+import { Designation } from "@prisma/client";
+import { DesignationFormData } from "@/types/form";
+import { createDesignationSchema } from "@/lib/validations";
+import { updateDesignation } from "@/actions/designation.action";
+
+const EditDesignation = ({ designation }: {
+    designation: Designation
+}) => {
     const [open, setOpen] = useState<boolean>(false);
 
 
     const designationForm = useForm<z.infer<typeof createDesignationSchema>>({
         resolver: zodResolver(createDesignationSchema),
         defaultValues: {
-            name: designation.name,
-            description: designation.description
+            name: designation.designationName,
+            description: designation.designationDescription ??  undefined
         }
     })
 
     const onSubmit = async (values: z.infer<typeof createDesignationSchema>) => {
         try {
-            const result = await editDesignation(values,designation.id);
+            const result = await updateDesignation(values,designation.designationId);
             if (result?.error) {
                 toast.error(result.error)
             } else {
